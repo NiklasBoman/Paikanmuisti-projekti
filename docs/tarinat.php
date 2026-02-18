@@ -94,26 +94,6 @@ usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
 <meta charset="UTF-8">
 <title>Tarinat</title>
 <link rel="stylesheet" href="Tyyli.css">
-<style>
-.letter-nav a {
-    margin: 4px;
-    padding: 6px 10px;
-    display: inline-block;
-    background: #eee;
-    border-radius: 4px;
-    text-decoration: none;
-}
-.letter-nav a.active {
-    background: #333;
-    color: white;
-}
-.tarina {
-    background: #f8f8f8;
-    padding: 15px;
-    margin-bottom: 20px;
-    border-radius: 6px;
-}
-</style>
 </head>
 <body>
 
@@ -121,7 +101,7 @@ usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
   <h2>Paikan Muisti</h2>
   <ul>
     <li><a href="kartta.php">Kartta</a></li>
-    <li><a href="tarinat.php">Tarinat</a></li>
+    <li><a href="tarinat.php">Arkisto</a></li>
     <li><a href="info.php">Info</a></li>
   </ul>
 </nav>
