@@ -55,6 +55,7 @@ font-weight: 500;
     display: flex;
     flex-direction: column;
     gap: 24px;
+    max-width: 65ch;
 }
 
 .tarina {
