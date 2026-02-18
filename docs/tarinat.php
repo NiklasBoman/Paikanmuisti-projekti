@@ -1,81 +1,107 @@
-
 <?php
-// 1. LUE VANHA ABCD_t.php
-$html = file_get_contents("ABCD_t.php");
 
-// 2. MUUNNA MERKISTÖ (poistaa □-merkit)
-$html = mb_convert_encoding($html, 'UTF-8', 'ISO-8859-1');
+// 1. FUNKTIO: LUE JA PARSETA TARINAT YHDESTÄ TIEDOSTOSTA
+function lue_tarinat_tiedostosta($filename) {
 
-// 3. Etsi kaikki <div id="...">...</div>
-preg_match_all('/<div id=[\'"]([^\'"]+)[\'"][^>]*>(.*?)<\/div>/si', $html, $matches);
+    if (!file_exists($filename)) return [];
 
-$tarinat = [];
+    // Lue tiedosto ISO-8859-1 → UTF-8
+    $html = file_get_contents($filename);
+    $html = mb_convert_encoding($html, 'UTF-8', 'ISO-8859-1');
 
-// 4. Jaa jokainen div useiksi tarinoiksi "Paikka:"-kohdan perusteella
-for ($i = 0; $i < count($matches[1]); $i++) {
+    // Etsi kaikki <div id="...">...</div>
+    preg_match_all('/<div id=[\'"]([^\'"]+)[\'"][^>]*>(.*?)<\/div>/si', $html, $matches);
 
-    $id = $matches[1][$i];
-    $content = trim($matches[2][$i]);
+    $tarinat = [];
 
-    // Poista ohjausmerkit
-    $content = preg_replace('/[\x00-\x1F\x7F]/u', '', $content);
+    for ($i = 0; $i < count($matches[1]); $i++) {
 
-    // Jaa tarinat
-    $parts = preg_split('/(?=<b>Paikka)/i', $content, -1, PREG_SPLIT_NO_EMPTY);
+        $id = $matches[1][$i];
+        $content = trim($matches[2][$i]);
 
-foreach ($parts as $index => $part) {
+        // Poista ohjausmerkit ja roskamerkit
+        $content = preg_replace('/[\x00-\x1F\x7F\x80-\x9F�]/u', '', $content);
 
-    // Poimi Paikka-nimi
-    $paikka = "";
-    if (preg_match('/<b>Paikka:\s*<\/b>([^<]+)/i', $part, $match)) {
-        $paikka = trim($match[1]);
+        //  A) ABCD-FORMAATTI (Paikka:)
+        if (preg_match('/<b>Paikka:\s*<\/b>/i', $content)) {
+
+            $parts = preg_split('/(?=<b>Paikka)/i', $content, -1, PREG_SPLIT_NO_EMPTY);
+
+            foreach ($parts as $index => $part) {
+
+                // Poimi Paikka-nimi
+                $paikka = "";
+                if (preg_match('/<b>Paikka:\s*<\/b>([^<]+)/i', $part, $m)) {
+                    $paikka = trim($m[1]);
+                }
+                if ($paikka === "") continue;
+
+                // Dekoodaa entityt
+                $paikka = html_entity_decode($paikka, ENT_QUOTES, 'UTF-8');
+                $part   = html_entity_decode($part,   ENT_QUOTES, 'UTF-8');
+
+                // Ensimmäinen kirjain
+                $firstLetter = strtoupper(mb_substr($paikka, 0, 1));
+
+                $tarinat[] = [
+                    "id" => $id . "_" . $index,
+                    "paikka" => $paikka,
+                    "firstLetter" => $firstLetter,
+                    "kuvaus" => $part
+                ];
+            }
+        }
+
+        //  B) AEOEAABB
+        else if (preg_match('/<b>Nimi:\s*<\/b>/i', $content)) {
+
+            // Poimi nimi
+            $paikka = "";
+            if (preg_match('/<b>Nimi:\s*<\/b>([^<]+)/i', $content, $m)) {
+                $paikka = trim($m[1]);
+            }
+            if ($paikka === "") continue;
+
+            $paikka = html_entity_decode($paikka, ENT_QUOTES, 'UTF-8');
+            $content = html_entity_decode($content, ENT_QUOTES, 'UTF-8');
+
+            // Ensimmäinen kirjain
+            $firstLetter = strtoupper(mb_substr($paikka, 0, 1));
+
+            $tarinat[] = [
+                "id" => $id,
+                "paikka" => $paikka,
+                "firstLetter" => $firstLetter,
+                "kuvaus" => $content
+            ];
+        }
     }
 
-    // Ohita tarinat ilman paikkaa
-    if ($paikka === "") continue;
-
-    // Poista rikkinäiset merkit (� ja ohjausmerkit)
-    $paikka = preg_replace('/[\x00-\x1F\x7F\x80-\x9F�]/u', '', $paikka);
-    $part   = preg_replace('/[\x00-\x1F\x7F\x80-\x9F�]/u', '', $part);
-
-    // Dekoodaa HTML-entityt (ö, ä, å)
-    $paikka = html_entity_decode($paikka, ENT_QUOTES, 'UTF-8');
-
-    // Ensimmäinen kirjain
-    $firstLetter = strtoupper(mb_substr($paikka, 0, 1));
-
-    // Lisää rivinvaihdot näkyviin
-    $part = str_replace("\n", "<br>", $part);
-
-    // Dekoodaa myös koko tarinan sisältö
-    $part = html_entity_decode($part, ENT_QUOTES, 'UTF-8');
-
-    $tarinat[] = [
-        "id" => $id . "_" . $index,
-        "paikka" => $paikka,
-        "firstLetter" => $firstLetter,
-        "kuvaus" => $part
-    ];
-}
+    return $tarinat;
 }
 
-// 5. POISTA TYHJÄT
+// 2. LUE TARINAT KAHDESTA TIEDOSTOSTA
+$tarinat = [];
+$tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("ABCD_t.php"));
+$tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("AEOEAABB_t.php"));
+
+// Poista tyhjät
 $tarinat = array_filter($tarinat, fn($t) => trim(strip_tags($t["kuvaus"])) !== "");
 
-// 6. HAKU
+// 3. HAKU JA KIRJAINSUODATUS
 $hakusana = isset($_GET['q']) ? strtolower($_GET['q']) : '';
+
 if ($hakusana !== '') {
     $tarinat = array_filter($tarinat, function($t) use ($hakusana) {
         return strpos(strtolower($t["kuvaus"]), $hakusana) !== false;
     });
-    $filterLetter = ""; // ohita kirjainsuodatus haussa
+    $filterLetter = "";
 } else {
-    // 7. KIRJAINSUODATUS
-    $filterLetter = $_GET['letter'] ?? 'A'; // oletus A
+    $filterLetter = $_GET['letter'] ?? 'A';
     $tarinat = array_filter($tarinat, fn($t) => $t["firstLetter"] === $filterLetter);
 }
 
-// 8. JÄRJESTÄ AAKKOSJÄRJESTYKSEEN
+// 4. JÄRJESTÄ AAKKOSITTAIN
 usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
 
 ?>
@@ -127,20 +153,23 @@ usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
     <button type="submit">Hae</button>
   </form>
 
-  <!-- TARINAT -->
-  <div class="tarina-list">
+<!-- TARINAT -->
+<div class="tarina-list">
     <?php foreach ($tarinat as $tarina): ?>
       <div class="tarina">
-        <h3><?php echo htmlspecialchars($tarina["paikka"]); ?></h3>
+        <h3><?php echo $tarina["paikka"]; ?></h3>
         <?php echo $tarina["kuvaus"]; ?>
-        <br>
       </div>
     <?php endforeach; ?>
-  </div>
+</div>
+
 
   <!-- AAKKOSNAVIGAATIO ALAREUNAAN -->
   <div class="letter-nav" style="margin-top:40px; text-align:center;">
-    <?php foreach (range('A','Z') as $letter): ?>
+    <?php 
+    $letters = array_merge(range('A','Z'), ['Å','Ä','Ö']);
+    foreach ($letters as $letter): 
+    ?>
       <a href="tarinat.php?letter=<?php echo $letter; ?>"
          class="<?php echo ($filterLetter === $letter ? 'active' : ''); ?>">
          <?php echo $letter; ?>
