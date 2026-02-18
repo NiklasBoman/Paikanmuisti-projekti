@@ -1,3 +1,4 @@
+
 <?php
 // 1. LUE VANHA ABCD_t.php
 $html = file_get_contents("ABCD_t.php");
@@ -133,7 +134,6 @@ usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
         <h3><?php echo htmlspecialchars($tarina["paikka"]); ?></h3>
         <?php echo $tarina["kuvaus"]; ?>
         <br>
-        <a href="kartta.php?id=<?php echo $tarina["id"]; ?>">Näytä kartalla</a>
       </div>
     <?php endforeach; ?>
   </div>
