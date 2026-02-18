@@ -55,14 +55,18 @@ font-weight: 500;
     display: flex;
     flex-direction: column;
     gap: 24px;
-    max-width: 65ch;
+    max-width: 100%;
 }
 
 .tarina {
-    background: #f2f2f2;
-    padding: 20px;
-    border-radius: 8px;
+    background-color: #818080;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    
 }
+
 
 .tarina h3 {
     margin: 0 0 8px 0;
