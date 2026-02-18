@@ -22,36 +22,40 @@ for ($i = 0; $i < count($matches[1]); $i++) {
     // Jaa tarinat
     $parts = preg_split('/(?=<b>Paikka)/i', $content, -1, PREG_SPLIT_NO_EMPTY);
 
-    foreach ($parts as $index => $part) {
+foreach ($parts as $index => $part) {
 
-        // Poimi Paikka-nimi
-        $paikka = "";
-        if (preg_match('/<b>Paikka:\s*<\/b>([^<]+)/i', $part, $match)) {
-            $paikka = trim($match[1]);
-        }
-
-        // Ohita tarinat ilman paikkaa
-        if ($paikka === "") continue;
-
-        // Dekoodaa HTML-entityt (ö, ä, å)
-        $paikka = html_entity_decode($paikka, ENT_QUOTES, 'UTF-8');
-
-        // Ensimmäinen kirjain
-        $firstLetter = strtoupper(mb_substr($paikka, 0, 1));
-
-        // Lisää rivinvaihdot näkyviin
-        $part = str_replace("\n", "<br>", $part);
-
-        // Dekoodaa myös koko tarinan sisältö
-        $part = html_entity_decode($part, ENT_QUOTES, 'UTF-8');
-
-        $tarinat[] = [
-            "id" => $id . "_" . $index,
-            "paikka" => $paikka,
-            "firstLetter" => $firstLetter,
-            "kuvaus" => $part
-        ];
+    // Poimi Paikka-nimi
+    $paikka = "";
+    if (preg_match('/<b>Paikka:\s*<\/b>([^<]+)/i', $part, $match)) {
+        $paikka = trim($match[1]);
     }
+
+    // Ohita tarinat ilman paikkaa
+    if ($paikka === "") continue;
+
+    // Poista rikkinäiset merkit (� ja ohjausmerkit)
+    $paikka = preg_replace('/[\x00-\x1F\x7F\x80-\x9F�]/u', '', $paikka);
+    $part   = preg_replace('/[\x00-\x1F\x7F\x80-\x9F�]/u', '', $part);
+
+    // Dekoodaa HTML-entityt (ö, ä, å)
+    $paikka = html_entity_decode($paikka, ENT_QUOTES, 'UTF-8');
+
+    // Ensimmäinen kirjain
+    $firstLetter = strtoupper(mb_substr($paikka, 0, 1));
+
+    // Lisää rivinvaihdot näkyviin
+    $part = str_replace("\n", "<br>", $part);
+
+    // Dekoodaa myös koko tarinan sisältö
+    $part = html_entity_decode($part, ENT_QUOTES, 'UTF-8');
+
+    $tarinat[] = [
+        "id" => $id . "_" . $index,
+        "paikka" => $paikka,
+        "firstLetter" => $firstLetter,
+        "kuvaus" => $part
+    ];
+}
 }
 
 // 5. POISTA TYHJÄT
