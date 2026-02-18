@@ -83,6 +83,29 @@ font-weight: 500;
     text-decoration: underline;
 }
 
+.haku input[type="text"] {
+    width: 90%;
+    padding: 8px 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.haku button {
+    margin-top: 10px;
+    padding: 8px 14px;
+    font-size: 16px;
+    background-color: #0077cc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.haku button:hover {
+    background-color: #005fa3;
+}
+
 
 /* Puhelimen skaalaus*/
 @media (max-width: 600px) {
