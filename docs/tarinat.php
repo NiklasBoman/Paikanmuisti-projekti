@@ -52,7 +52,7 @@ function lue_tarinat_tiedostosta($filename) {
             }
         }
 
-        //  B) AEOEAABB / CCDDPPKK -FORMAATTI (Nimi:)
+        //  B) AEOEAABB / CCDDPPKK / E_t.php / HIGF_t.php -FORMAATTI (Nimi:)
         else if (preg_match('/<b>Nimi:\s*<\/b>/i', $content)) {
 
             // Poimi nimi
@@ -81,11 +81,13 @@ function lue_tarinat_tiedostosta($filename) {
     return $tarinat;
 }
 
-// 2. LUE TARINAT KOLMESTA TIEDOSTOSTA
+// 2. LUE TARINAT VIIDESTÄ TIEDOSTOSTA
 $tarinat = [];
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("ABCD_t.php"));
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("AEOEAABB_t.php"));
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("CCDDPPKK_t.php"));
+$tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("E_t.php"));
+$tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("HIGF_t.php"));
 
 // Poista tyhjät
 $tarinat = array_filter($tarinat, fn($t) => trim(strip_tags($t["kuvaus"])) !== "");
