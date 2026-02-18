@@ -52,7 +52,7 @@ function lue_tarinat_tiedostosta($filename) {
             }
         }
 
-        //  B) AEOEAABB
+        //  B) AEOEAABB / CCDDPPKK -FORMAATTI (Nimi:)
         else if (preg_match('/<b>Nimi:\s*<\/b>/i', $content)) {
 
             // Poimi nimi
@@ -62,6 +62,7 @@ function lue_tarinat_tiedostosta($filename) {
             }
             if ($paikka === "") continue;
 
+            // Dekoodaa entityt
             $paikka = html_entity_decode($paikka, ENT_QUOTES, 'UTF-8');
             $content = html_entity_decode($content, ENT_QUOTES, 'UTF-8');
 
@@ -80,10 +81,11 @@ function lue_tarinat_tiedostosta($filename) {
     return $tarinat;
 }
 
-// 2. LUE TARINAT KAHDESTA TIEDOSTOSTA
+// 2. LUE TARINAT KOLMESTA TIEDOSTOSTA
 $tarinat = [];
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("ABCD_t.php"));
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("AEOEAABB_t.php"));
+$tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("CCDDPPKK_t.php"));
 
 // Poista tyhjät
 $tarinat = array_filter($tarinat, fn($t) => trim(strip_tags($t["kuvaus"])) !== "");
@@ -162,7 +164,6 @@ usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
       </div>
     <?php endforeach; ?>
 </div>
-
 
   <!-- AAKKOSNAVIGAATIO ALAREUNAAN -->
   <div class="letter-nav" style="margin-top:40px; text-align:center;">
