@@ -10,7 +10,8 @@
   <h2>Paikan Muisti</h2>
   <ul>
     <li><a href="kartta.php">Kartta</a></li>
-    <li><a href="tarinat.php">Tarinat</a></li>
+    <li><a href="tarinat.php">Arkisto
+    </a></li>
     <li><a href="info.php">Info</a></li>
   </ul>
 </nav>
