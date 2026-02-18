@@ -55,7 +55,7 @@ font-weight: 500;
     display: flex;
     flex-direction: column;
     gap: 24px;
-    max-width: 100%;
+    max-width: 95%;
 }
 
 .tarina {
@@ -94,6 +94,7 @@ font-weight: 500;
     font-size: 16px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    margin-left: 5px;
 }
 
 .haku button {
@@ -131,24 +132,39 @@ font-weight: 500;
 
 
 /* Puhelimen skaalaus*/
-@media (max-width: 600px) {
-    nav {
-        height: 7vh;
-        padding: 0 16px;
+@media (max-width: 1000px) {
+
+    .haku {
+        width: 95%;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
     }
 
-    nav h2 {
-        font-size: 2.5vh;
+    .haku input[type="text"] {
+        width: 90%;
+        box-sizing: border-box;
+        padding: 10px;
+        font-size: 15px;
     }
 
-    nav ul {
-        gap: 12px;
-    }
-    nav a {
-        font-size: 2vh;
+    .haku button {
+        width: 10%;
+        box-sizing: border-box;
+        padding: 10px;
+        font-size: 15px;
     }
 
-    .map {
-        height: calc(100vh - 7vh);
+    .tarina-list {
+        width: 95%;
+        margin: 0 auto;
+    }
+
+    .tarina {
+        padding: 12px;
     }
 }
+
+
+
