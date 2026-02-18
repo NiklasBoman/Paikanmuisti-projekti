@@ -16,64 +16,42 @@ function lue_tarinat_tiedostosta($filename) {
 
     for ($i = 0; $i < count($matches[1]); $i++) {
 
-        $id = $matches[1][$i];
+        $id_base = $matches[1][$i];
         $content = trim($matches[2][$i]);
 
-        // Poista ohjausmerkit ja roskamerkit
+        // Poista roskamerkit
         $content = preg_replace('/[\x00-\x1F\x7F\x80-\x9F�]/u', '', $content);
 
-        //  A) ABCD-FORMAATTI (Paikka:)
-        if (preg_match('/<b>Paikka:\s*<\/b>/i', $content)) {
+        // Jokainen <b>Nimi:</b> tai <b>Paikka:</b> aloittaa uuden tarinan
+        $parts = preg_split('/(?=<b>(Nimi|Paikka):\s*<\/b>)/i', $content, -1, PREG_SPLIT_NO_EMPTY);
 
-            $parts = preg_split('/(?=<b>Paikka)/i', $content, -1, PREG_SPLIT_NO_EMPTY);
+        foreach ($parts as $index => $part) {
 
-            foreach ($parts as $index => $part) {
-
-                // Poimi Paikka-nimi
-                $paikka = "";
-                if (preg_match('/<b>Paikka:\s*<\/b>([^<]+)/i', $part, $m)) {
-                    $paikka = trim($m[1]);
-                }
-                if ($paikka === "") continue;
-
-                // Dekoodaa entityt
-                $paikka = html_entity_decode($paikka, ENT_QUOTES, 'UTF-8');
-                $part   = html_entity_decode($part,   ENT_QUOTES, 'UTF-8');
-
-                // Ensimmäinen kirjain
-                $firstLetter = strtoupper(mb_substr($paikka, 0, 1));
-
-                $tarinat[] = [
-                    "id" => $id . "_" . $index,
-                    "paikka" => $paikka,
-                    "firstLetter" => $firstLetter,
-                    "kuvaus" => $part
-                ];
-            }
-        }
-
-        //  B) AEOEAABB / CCDDPPKK / E_t.php / HIGF_t.php -FORMAATTI (Nimi:)
-        else if (preg_match('/<b>Nimi:\s*<\/b>/i', $content)) {
-
-            // Poimi nimi
+            // Poimi nimi / paikka
             $paikka = "";
-            if (preg_match('/<b>Nimi:\s*<\/b>([^<]+)/i', $content, $m)) {
+
+            if (preg_match('/<b>Nimi:\s*<\/b>([^<]+)/i', $part, $m)) {
                 $paikka = trim($m[1]);
             }
+            else if (preg_match('/<b>Paikka:\s*<\/b>([^<]+)/i', $part, $m)) {
+                $paikka = trim($m[1]);
+            }
+
             if ($paikka === "") continue;
 
             // Dekoodaa entityt
             $paikka = html_entity_decode($paikka, ENT_QUOTES, 'UTF-8');
-            $content = html_entity_decode($content, ENT_QUOTES, 'UTF-8');
+            $part   = html_entity_decode($part,   ENT_QUOTES, 'UTF-8');
 
             // Ensimmäinen kirjain
             $firstLetter = strtoupper(mb_substr($paikka, 0, 1));
 
+            // Luo tarina
             $tarinat[] = [
-                "id" => $id,
+                "id" => $id_base . "_" . $index,
                 "paikka" => $paikka,
                 "firstLetter" => $firstLetter,
-                "kuvaus" => $content
+                "kuvaus" => $part
             ];
         }
     }
@@ -81,7 +59,7 @@ function lue_tarinat_tiedostosta($filename) {
     return $tarinat;
 }
 
-// 2. LUE TARINAT VIIDESTÄ TIEDOSTOSTA
+// 2. LUE TARINAT TIEDOSTOISTA
 $tarinat = [];
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("ABCD_t.php"));
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("AEOEAABB_t.php"));
@@ -97,7 +75,8 @@ $hakusana = isset($_GET['q']) ? strtolower($_GET['q']) : '';
 
 if ($hakusana !== '') {
     $tarinat = array_filter($tarinat, function($t) use ($hakusana) {
-        return strpos(strtolower($t["kuvaus"]), $hakusana) !== false;
+        return strpos(strtolower($t["kuvaus"]), $hakusana) !== false
+            || strpos(strtolower($t["paikka"]), $hakusana) !== false;
     });
     $filterLetter = "";
 } else {
@@ -157,15 +136,15 @@ usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
     <button type="submit">Hae</button>
   </form>
 
-<!-- TARINAT -->
-<div class="tarina-list">
+  <!-- TARINAT -->
+  <div class="tarina-list">
     <?php foreach ($tarinat as $tarina): ?>
       <div class="tarina">
-        <h3><?php echo $tarina["paikka"]; ?></h3>
+        <h3><?php echo htmlspecialchars($tarina["paikka"]); ?></h3>
         <?php echo $tarina["kuvaus"]; ?>
       </div>
     <?php endforeach; ?>
-</div>
+  </div>
 
   <!-- AAKKOSNAVIGAATIO ALAREUNAAN -->
   <div class="letter-nav" style="margin-top:40px; text-align:center;">
