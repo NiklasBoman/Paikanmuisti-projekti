@@ -20,4 +20,7 @@
 <p>Tervossa on lukematon määrä paikannimiä. Nimet kertovat metsästys- kalastus- ja pyyntikulttuurista ja kaskiviljelystä - tervolaisesta menneisyydestä ja nykyisyydestä. 
 Nimet ovat kielen ja historian hyperlinkkejä. Niiden kautta avautuu paikan muisti. 
 Paikan muisti –osion nimistö perustuu Kotimaisten kielten tutkimuskeskuksen paikannimiarkiston Tervosta koottuihin nimitietoihin<p>
+<br>
+<h3>Tietoja sivusta</h3>
+<p>Sivulla voi hakea tarinoita paikan nimillä. Tarinat on koottu Tervon paikannimiarkiston tietokannasta. Tarinoiden tekstit on kirjoitettu suoraan tietokantaan, joten niissä saattaa olla kirjoitusvirheitä tai vanhentunutta tietoa.
 </html>
