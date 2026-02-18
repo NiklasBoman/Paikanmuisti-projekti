@@ -106,6 +106,24 @@ font-weight: 500;
 .haku button:hover {
     background-color: #005fa3;
 }
+.letter-nav a {
+    margin: 4px;
+    padding: 6px 10px;
+    display: inline-block;
+    background: #eee;
+    border-radius: 4px;
+    text-decoration: none;
+}
+.letter-nav a.active {
+    background: #333;
+    color: white;
+}
+.tarina {
+    background: #f8f8f8;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+}
 
 
 /* Puhelimen skaalaus*/
@@ -130,4 +148,3 @@ font-weight: 500;
         height: calc(100vh - 7vh);
     }
 }
-
