@@ -1,18 +1,13 @@
-
-<?php
-$lat = 62.95556;
-$lng = 26.75556;
-$zoom = 12;
-
-$mapUrl = "https://www.google.com/maps?q={$lat},{$lng}&z={$zoom}&output=embed";
-?>
 <!DOCTYPE html>
 <html lang="fi">
 <head>
 <meta charset="UTF-8">
 <title>Tervon kartta</title>
+
 <link rel="stylesheet" href="Tyyli.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
+
 <body>
 
 <nav>
@@ -24,13 +19,41 @@ $mapUrl = "https://www.google.com/maps?q={$lat},{$lng}&z={$zoom}&output=embed";
   </ul>
 </nav>
 
-<iframe 
-    src="<?php echo $mapUrl; ?>"
-    class="map"
-    allowfullscreen=""
-    loading="lazy"
-    referrerpolicy="no-referrer-when-downgrade">
-</iframe>
+<!-- ⭐ HUOM: käytetään class="map" koska CSS käyttää .map ⭐ -->
+<div class="map" id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+// Lisää omat paikat tähän 
+const paikat = [
+  {
+    nimi: "Tervo keskusta",
+    lat: 62.95556,
+    lng: 26.75556,
+    kuvaus: "Tervon keskusta."
+  },
+  {
+    nimi: "Esimerkkipaikka",
+    lat: 62.96000,
+    lng: 26.76000,
+    kuvaus: "Tähän voit lisätä oman kuvauksen."
+  }
+];
+
+const map = L.map('map').setView([62.95556, 26.75556], 12);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: ''
+}).addTo(map);
+
+paikat.forEach(p => {
+  L.marker([p.lat, p.lng])
+    .addTo(map)
+    .bindPopup(`<strong>${p.nimi}</strong><br>${p.kuvaus}`);
+});
+</script>
 
 </body>
 </html>
