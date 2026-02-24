@@ -66,7 +66,7 @@ $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("AEOEAABB_t.php"));
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("CCDDPPKK_t.php"));
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("E_t.php"));
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("HIGF_t.php"));
-
+$tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("J_t.php"));
 // Poista tyhjät
 $tarinat = array_filter($tarinat, fn($t) => trim(strip_tags($t["kuvaus"])) !== "");
 
