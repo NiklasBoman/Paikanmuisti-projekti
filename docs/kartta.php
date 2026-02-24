@@ -24,40 +24,13 @@ $mapUrl = "https://www.google.com/maps?q={$lat},{$lng}&z={$zoom}&output=embed";
   </ul>
 </nav>
 
-<div id="map" style="width:100%; height:80vh;"></div>
-
-<script>
-function initMap() {
-  const center = { lat: 62.95556, lng: 26.75556 };
-
-  const map = new google.maps.Map(document.getElementById("map"), {
-    zoom: 12,
-    center: center
-  });
-
-  tarinat.forEach(t => {
-    if (!t.lat || !t.lng) return;
-
-    const marker = new google.maps.Marker({
-      position: { lat: parseFloat(t.lat), lng: parseFloat(t.lng) },
-      map: map,
-      title: t.paikka
-    });
-
-    const info = new google.maps.InfoWindow({
-      content: `
-        <strong>${t.paikka}</strong><br>
-        <a href="tarinat.php?q=${encodeURIComponent(t.paikka)}">
-          Avaa tarina
-        </a>`
-    });
-
-    marker.addListener("click", () => info.open(map, marker));
-  });
-}
-</script>
-
-<script src="https://maps.googleapis.com/maps/api/js?key=OMA_API_AVAIN&callback=initMap" async></script>
+<iframe 
+    src="<?php echo $mapUrl; ?>"
+    class="map"
+    allowfullscreen=""
+    loading="lazy"
+    referrerpolicy="no-referrer-when-downgrade">
+</iframe>
 
 </body>
 </html>
