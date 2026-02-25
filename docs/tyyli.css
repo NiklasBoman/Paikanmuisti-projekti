@@ -1,3 +1,4 @@
+
 body{
     margin: 0;
 }
@@ -165,6 +166,43 @@ font-weight: 500;
         padding: 12px;
     }
 }
+/* Info-sivu */
+.info {
+    padding: 32px;
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fafafa;
+}
 
+.info h1 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    font-size: 32px;
+}
 
+.info h3 {
+    margin-top: 32px;
+    margin-bottom: 12px;
+    font-size: 22px;
+}
 
+.info p {
+    line-height: 1.6;
+    color: #444;
+    margin-bottom: 16px;
+}
+
+/* Mobiili */
+@media (max-width: 1000px) {
+    .info {
+        padding: 20px;
+    }
+
+    .info h1 {
+        font-size: 26px;
+    }
+
+    .info h3 {
+        font-size: 20px;
+    }
+}
