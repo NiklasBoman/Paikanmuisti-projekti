@@ -17,15 +17,13 @@
     <li><a href="tarinat.php">Arkisto</a></li>
     <li><a href="info.php">Info</a></li>
   </ul>
-</nav>
-
-<!-- ⭐ HUOM: käytetään class="map" koska CSS käyttää .map ⭐ -->
+</nav> 
 <div class="map" id="map"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
-// Lisää omat paikat tähän 
+//paikat tähän 
 const paikat = [
   {
     nimi: "Tervo keskusta",
@@ -35,9 +33,9 @@ const paikat = [
   },
   {
     nimi: "Esimerkkipaikka",
-    lat: 62.96000,
+    lat: 62.95700,
     lng: 26.76000,
-    kuvaus: "Tähän voit lisätä oman kuvauksen."
+    kuvaus: "kuvaus."
   }
 ];
 
