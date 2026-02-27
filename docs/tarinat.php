@@ -102,6 +102,7 @@ usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
   <ul>
     <li><a href="kartta.php">Kartta</a></li>
     <li><a href="tarinat.php">Arkisto</a></li>
+    <li><a href="KuvaA.php">Kuva Arkisto</a></li>
     <li><a href="info.php">Info</a></li>
   </ul>
 </nav>
