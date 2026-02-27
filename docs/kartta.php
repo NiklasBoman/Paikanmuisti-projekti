@@ -3,11 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>Tervon kartta</title>
-
 <link rel="stylesheet" href="Tyyli.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-</head>
-
 <body>
 
 <nav>
@@ -15,6 +12,7 @@
   <ul>
     <li><a href="kartta.php">Kartta</a></li>
     <li><a href="tarinat.php">Arkisto</a></li>
+    <li><a href="KuvaA.php">Kuva Arkisto</a></li>
     <li><a href="info.php">Info</a></li>
   </ul>
 </nav> 
@@ -39,6 +37,7 @@ const paikat = [
   }
 ];
 
+
 const map = L.map('map').setView([62.95556, 26.75556], 12);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -52,6 +51,5 @@ paikat.forEach(p => {
     .bindPopup(`<strong>${p.nimi}</strong><br>${p.kuvaus}`);
 });
 </script>
-
 </body>
 </html>
