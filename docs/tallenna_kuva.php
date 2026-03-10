@@ -20,7 +20,7 @@ move_uploaded_file($tmp, $kohde);
 // tallentaa tiedot tietokantaan
 $sql = "INSERT INTO kuvat (paikka, kuva_url, kuvaus) VALUES (?, ?, ?)";
 $stmt = $pdo->prepare($sql);
-$stmt->execute([$paikka, $kuvaNimi, $kuvaus]);
+$stmt->execute([$paikka, $kohde, $kuvaus]);
 
 echo "Kuva lisätty!";
 ?>
