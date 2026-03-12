@@ -13,6 +13,8 @@ if (!isset($_GET["id"])) {
 
 $id = $_GET["id"];
 
+// --- LUE TARINAT SAMALLA FUNKTIOLLA KUIN TARINAT.PHP ---
+
 function lue_tarinat_tiedostosta($filename) {
 
     if (!file_exists($filename)) return [];
