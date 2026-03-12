@@ -151,7 +151,7 @@ usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
 </nav>
 
 <section class="tarinat">
-  <h2>Tarinat</h2>
+  <h2>Arkisto</h2>
 
   <!-- HAKU -->
   <form method="GET" class="haku">
