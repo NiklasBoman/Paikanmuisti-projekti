@@ -6,7 +6,7 @@ if (!isset($_SESSION["admin"]) || $_SESSION["admin"] !== true) {
     die("Ei oikeuksia");
 }
 
-// Tarkista että data tuli
+// Tarkistaa että data tuli
 if (!isset($_POST["id"]) || !isset($_POST["paikka"]) || !isset($_POST["kuvaus"])) {
     die("Virhe: puuttuva data");
 }
@@ -14,9 +14,6 @@ if (!isset($_POST["id"]) || !isset($_POST["paikka"]) || !isset($_POST["kuvaus"])
 $id = $_POST["id"];
 $paikka = $_POST["paikka"];
 $kuvaus = $_POST["kuvaus"];
-
-// Tässä vaiheessa emme vielä kirjoita tiedostoihin.
-// Näytetään vain, että data tulee läpi oikein.
 
 ?>
 <!DOCTYPE html>
