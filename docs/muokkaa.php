@@ -13,8 +13,7 @@ if (!isset($_GET["id"])) {
 
 $id = $_GET["id"];
 
-// --- LUE TARINAT SAMALLA FUNKTIOLLA KUIN TARINAT.PHP ---
-
+// --- FUNKTIO TARINOIDEN LUKEMISEEN ---
 function lue_tarinat_tiedostosta($filename) {
 
     if (!file_exists($filename)) return [];
@@ -65,7 +64,7 @@ function lue_tarinat_tiedostosta($filename) {
     return $tarinat;
 }
 
-// LUE KAIKKI TARINAT
+// --- LUE KAIKKI TARINAT ---
 $tarinat = [];
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("ABCD_t.php"));
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("AEOEAABB_t.php"));
@@ -84,7 +83,19 @@ foreach ($tarinat as $t) {
 }
 
 if (!$tarina) {
-    die("Tarinaa ei löytynyt");
+    die("Tarinaa ei löytynyt alkuperäisistä tiedostoista");
+}
+
+// --- KORVAA TARINA JSON-TIEDOSTON MUOKATULLA VERSIOLLA ---
+$jsonFile = "tarinat.json";
+if (file_exists($jsonFile)) {
+    $jsonContent = file_get_contents($jsonFile);
+    $muokatut = json_decode($jsonContent, true);
+
+    if (isset($muokatut[$id])) {
+        $tarina["paikka"] = $muokatut[$id]["paikka"];
+        $tarina["kuvaus"] = $muokatut[$id]["kuvaus"];
+    }
 }
 
 ?>
