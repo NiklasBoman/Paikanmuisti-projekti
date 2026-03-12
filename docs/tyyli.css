@@ -1,3 +1,4 @@
+
 body{
     margin: 0;
 }
@@ -130,10 +131,31 @@ font-weight: 500;
     border-radius: 6px;
 }
 
-.kirjaimet{
-    margin-top:40px;
-    text-align:center;
+.kirjaimet {
+    margin-top: 40px;
+    text-align: center;
 }
+
+.kirjaimet a {
+    display: inline-block;
+    margin: 0 5px;
+    padding: 6px 10px;
+    font-size: 18px;
+    text-decoration: none;
+    color: #333;
+    border-radius: 4px;
+    transition: 0.2s;
+}
+
+.kirjaimet a:hover {
+    background-color: #eee;
+}
+
+.kirjaimet a.active {
+    background-color: #333;
+    color: #fff;
+}
+
 
 /* Puhelimen skaalaus*/
 @media (max-width: 1000px) {
