@@ -128,7 +128,7 @@ usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
   </div>
 
   <!-- AAKKOSNAVIGAATIO ALAREUNAAN -->
-  <div class="letter-nav" style="margin-top:40px; text-align:center;">
+  <div class="kirjaimet">
     <?php 
     $letters = array_merge(range('A','Z'), ['Å','Ä','Ö']);
     foreach ($letters as $letter): 
