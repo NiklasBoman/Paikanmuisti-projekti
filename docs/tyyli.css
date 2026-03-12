@@ -1,4 +1,3 @@
-
 body{
     margin: 0;
 }
@@ -131,6 +130,10 @@ font-weight: 500;
     border-radius: 6px;
 }
 
+.kirjaimet{
+    margin-top:40px;
+    text-align:center;
+}
 
 /* Puhelimen skaalaus*/
 @media (max-width: 1000px) {
