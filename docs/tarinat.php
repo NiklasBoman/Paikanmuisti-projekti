@@ -73,7 +73,23 @@ $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("J_t.php"));
 // Poista tyhjät
 $tarinat = array_filter($tarinat, fn($t) => trim(strip_tags($t["kuvaus"])) !== "");
 
-// 3. HAKU JA KIRJAINSUODATUS
+// 3.5 KORVAA TARINAT JSON-TIEDOSTON MUOKATUILLA VERSIOILLA
+$jsonFile = "tarinat.json";
+if (file_exists($jsonFile)) {
+    $jsonContent = file_get_contents($jsonFile);
+    $muokatut = json_decode($jsonContent, true);
+
+    if (is_array($muokatut)) {
+        foreach ($tarinat as &$t) {
+            if (isset($muokatut[$t["id"]])) {
+                $t["paikka"] = $muokatut[$t["id"]]["paikka"];
+                $t["kuvaus"] = $muokatut[$t["id"]]["kuvaus"];
+            }
+        }
+    }
+}
+
+// 4. HAKU JA KIRJAINSUODATUS
 $hakusana = isset($_GET['q']) ? strtolower($_GET['q']) : '';
 
 if ($hakusana !== '') {
@@ -87,7 +103,7 @@ if ($hakusana !== '') {
     $tarinat = array_filter($tarinat, fn($t) => $t["firstLetter"] === $filterLetter);
 }
 
-// 4. JÄRJESTÄ AAKKOSITTAIN
+// 5. JÄRJESTÄ AAKKOSITTAIN
 usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
 
 ?>
