@@ -126,8 +126,6 @@ usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
 
     <?php if ($isAdmin): ?>
         <li><a href="logout.php">Kirjaudu ulos</a></li>
-    <?php else: ?>
-        <li><a href="login.php">Admin</a></li>
     <?php endif; ?>
   </ul>
 </nav>
