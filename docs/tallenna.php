@@ -6,7 +6,7 @@ if (!isset($_SESSION["admin"]) || $_SESSION["admin"] !== true) {
     die("Ei oikeuksia");
 }
 
-// Tarkistaa että data tuli
+// Tarkista että data tuli
 if (!isset($_POST["id"]) || !isset($_POST["paikka"]) || !isset($_POST["kuvaus"])) {
     die("Virhe: puuttuva data");
 }
@@ -15,22 +15,24 @@ $id = $_POST["id"];
 $paikka = $_POST["paikka"];
 $kuvaus = $_POST["kuvaus"];
 
-?>
-<!DOCTYPE html>
-<html lang="fi">
-<head>
-<meta charset="UTF-8">
-<title>Tallennus onnistui</title>
-</head>
-<body>
+// Lue olemassa oleva JSON
+$jsonFile = "tarinat.json";
+$data = [];
 
-<h2>Tallennus toimii!</h2>
+if (file_exists($jsonFile)) {
+    $jsonContent = file_get_contents($jsonFile);
+    $data = json_decode($jsonContent, true);
+    if (!is_array($data)) $data = [];
+}
 
-<p><b>ID:</b> <?php echo htmlspecialchars($id); ?></p>
-<p><b>Paikka:</b> <?php echo htmlspecialchars($paikka); ?></p>
-<p><b>Kuvaus:</b><br><?php echo nl2br(htmlspecialchars($kuvaus)); ?></p>
+// Tallenna tarina JSON:iin
+$data[$id] = [
+    "paikka" => $paikka,
+    "kuvaus" => $kuvaus
+];
 
-<p><a href="tarinat.php">Palaa tarinoihin</a></p>
+// Kirjoita takaisin tiedostoon
+file_put_contents($jsonFile, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
-</body>
-</html>
+echo "<h2>Muutokset tallennettu!</h2>";
+echo "<p><a href='tarinat.php'>Palaa tarinoihin</a></p>";
