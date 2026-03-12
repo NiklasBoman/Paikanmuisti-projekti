@@ -1,4 +1,6 @@
 <?php
+session_start();
+$isAdmin = isset($_SESSION["admin"]) && $_SESSION["admin"] === true;
 
 // 1. FUNKTIO: LUE JA PARSETA TARINAT YHDESTÄ TIEDOSTOSTA
 function lue_tarinat_tiedostosta($filename) {
@@ -67,6 +69,7 @@ $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("CCDDPPKK_t.php"));
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("E_t.php"));
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("HIGF_t.php"));
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("J_t.php"));
+
 // Poista tyhjät
 $tarinat = array_filter($tarinat, fn($t) => trim(strip_tags($t["kuvaus"])) !== "");
 
@@ -104,6 +107,12 @@ usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
     <li><a href="tarinat.php">Arkisto</a></li>
     <li><a href="KuvaA.php">Kuva-arkisto</a></li>
     <li><a href="info.php">Info</a></li>
+
+    <?php if ($isAdmin): ?>
+        <li><a href="logout.php">Kirjaudu ulos</a></li>
+    <?php else: ?>
+        <li><a href="login.php">Admin</a></li>
+    <?php endif; ?>
   </ul>
 </nav>
 
@@ -120,14 +129,21 @@ usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
   <!-- TARINAT -->
   <div class="tarina-list">
     <?php foreach ($tarinat as $tarina): ?>
-      <div class="tarina">
-        <h3><?php echo htmlspecialchars($tarina["paikka"]); ?></h3>
-        <?php echo $tarina["kuvaus"]; ?>
-      </div>
+<div class="tarina">
+    <h3>
+        <?php echo htmlspecialchars($tarina["paikka"]); ?>
+
+        <?php if ($isAdmin): ?>
+            <a href="muokkaa.php?id=<?php echo $tarina['id']; ?>" class="edit-btn">Muokkaa</a>
+        <?php endif; ?>
+    </h3>
+
+    <?php echo $tarina["kuvaus"]; ?>
+</div>
     <?php endforeach; ?>
   </div>
 
-  <!-- AAKKOSNAVIGAATIO ALAREUNAAN -->
+  <!-- AAKKOSNAVIGAATIO -->
   <div class="kirjaimet">
     <?php 
     $letters = array_merge(range('A','Z'), ['Å','Ä','Ö']);
