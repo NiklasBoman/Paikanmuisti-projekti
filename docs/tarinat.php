@@ -86,6 +86,26 @@ if (file_exists($jsonFile)) {
                 $t["kuvaus"] = $muokatut[$t["id"]]["kuvaus"];
             }
         }
+
+        // LISÄÄ UUDET TARINAT JSON:STA
+        foreach ($muokatut as $id => $data) {
+            $found = false;
+            foreach ($tarinat as $t) {
+                if ($t["id"] === $id) {
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                $firstLetter = strtoupper(mb_substr($data["paikka"], 0, 1));
+                $tarinat[] = [
+                    "id" => $id,
+                    "paikka" => $data["paikka"],
+                    "firstLetter" => $firstLetter,
+                    "kuvaus" => $data["kuvaus"]
+                ];
+            }
+        }
     }
 }
 
@@ -138,6 +158,13 @@ usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
     <input type="text" name="q" placeholder="Hae tarinoita..."
            value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>">
     <button type="submit">Hae</button>
+  </form>
+<br>
+<!--TARINAN LISÄYS (ADMIN)-->
+  <form>
+        <?php if ($isAdmin): ?>
+            <a href="lisaa.php" class="add-btn">Lisää tarina</a>
+        <?php endif; ?>
   </form>
 
   <!-- TARINAT -->
