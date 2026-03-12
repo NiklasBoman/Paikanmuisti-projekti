@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 
@@ -64,7 +65,7 @@ function lue_tarinat_tiedostosta($filename) {
     return $tarinat;
 }
 
-// --- LUE KAIKKI TARINAT ALKUPERÄISISTÄ TIEDOSTOISTA ---
+// --- LUE KAIKKI TARINAT ---
 $tarinat = [];
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("ABCD_t.php"));
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("AEOEAABB_t.php"));
@@ -73,7 +74,7 @@ $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("E_t.php"));
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("HIGF_t.php"));
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("J_t.php"));
 
-// ETSI TARINA ALKUPERÄISISTÄ
+// ETSI TARINA ID:N PERUSTEELLA
 $tarina = null;
 foreach ($tarinat as $t) {
     if ($t["id"] === $id) {
@@ -82,30 +83,12 @@ foreach ($tarinat as $t) {
     }
 }
 
-// --- JOS EI LÖYDY ALKUPERÄISISTÄ → ETSI JSON-TIEDOSTOSTA ---
-$jsonFile = "tarinat.json";
-
-if (!$tarina && file_exists($jsonFile)) {
-
-    $jsonContent = file_get_contents($jsonFile);
-    $muokatut = json_decode($jsonContent, true);
-
-    if (isset($muokatut[$id])) {
-        $tarina = [
-            "id" => $id,
-            "paikka" => $muokatut[$id]["paikka"],
-            "kuvaus" => $muokatut[$id]["kuvaus"],
-            "firstLetter" => strtoupper(mb_substr($muokatut[$id]["paikka"], 0, 1))
-        ];
-    }
-}
-
-// --- JOS EI LÖYDY MISTÄÄN ---
 if (!$tarina) {
-    die("Tarinaa ei löytynyt (ei alkuperäisistä eikä JSON:ista)");
+    die("Tarinaa ei löytynyt alkuperäisistä tiedostoista");
 }
 
-// --- KORVAA TARINA JSON-VERSIOLLA JOS OLEMASSA ---
+// --- KORVAA TARINA JSON-TIEDOSTON MUOKATULLA VERSIOLLA ---
+$jsonFile = "tarinat.json";
 if (file_exists($jsonFile)) {
     $jsonContent = file_get_contents($jsonFile);
     $muokatut = json_decode($jsonContent, true);
