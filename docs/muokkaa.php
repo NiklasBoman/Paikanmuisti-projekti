@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 
@@ -123,6 +124,8 @@ if (file_exists($jsonFile)) {
 <meta charset="UTF-8">
 <title>Muokkaa tarinaa</title>
 </head>
+<link rel="stylesheet" href="Tyyli.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <body>
 
 <h2>Muokkaa tarinaa</h2>
@@ -139,6 +142,8 @@ if (file_exists($jsonFile)) {
     ?></textarea><br><br>
 
     <button type="submit">Tallenna muutokset</button>
+    <br><br>
+    <a href="tarinat.php">Peruuta</a>
 </form>
 
 </body>
