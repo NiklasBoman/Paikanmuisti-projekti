@@ -10,7 +10,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if ($user === $correct_user && $pass === $correct_pass) {
         $_SESSION["admin"] = true;
-        header("Location: admin.php");
+        header("Location: tarinat.php");
         exit;
     } else {
         $error = "Väärä käyttäjä tai salasana!";
