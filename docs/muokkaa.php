@@ -141,8 +141,7 @@ if (file_exists($jsonFile)) {
         echo htmlspecialchars($tarina["kuvaus"]); 
     ?></textarea><br><br>
 
-    <button type="submit">Tallenna muutokset</button>
-    <br><br>
+    <button type="submit">Tallenna muutokset</button> 
     <a href="tarinat.php">Peruuta</a>
 </form>
 
