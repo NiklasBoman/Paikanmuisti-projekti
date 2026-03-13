@@ -1,22 +1,44 @@
 <?php
 session_start();
 
-$adminUser = "admin";
-$adminPass = "salasana123";
+$correct_user = "admin";
+$correct_pass = "1234";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    if ($_POST["user"] === $adminUser && $_POST["pass"] === $adminPass) {
+    $user = $_POST["user"] ?? "";
+    $pass = $_POST["pass"] ?? "";
+
+    if ($user === $correct_user && $pass === $correct_pass) {
         $_SESSION["admin"] = true;
-        header("Location: tarinat.php");
+        header("Location: admin.php");
         exit;
     } else {
-        $error = "Väärä käyttäjätunnus tai salasana";
+        $error = "Väärä käyttäjä tai salasana!";
     }
 }
 ?>
-<form method="POST">
-    <input type="text" name="user" placeholder="Käyttäjä">
-    <input type="password" name="pass" placeholder="Salasana">
-    <button type="submit">Kirjaudu</button>
-</form>
-<?php if(isset($error)) echo $error; ?>
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<title>Admin Login</title>
+<link rel="stylesheet" href="Tyyli.css">
+</head>
+<body>
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <h2>Admin Login</h2>
+
+        <form method="POST">
+            <input type="text" name="user" placeholder="Käyttäjä">
+            <input type="password" name="pass" placeholder="Salasana">
+            <button type="submit">Kirjaudu</button>
+        </form>
+
+        <?php if(isset($error)) echo "<div class='login-error'>$error</div>"; ?>
+    </div>
+</div>
+
+</body>
+</html>
