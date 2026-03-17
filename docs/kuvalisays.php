@@ -1,3 +1,19 @@
+<?php
+session_start();
+
+// Vain admin saa muokata
+if (!isset($_SESSION["admin"]) || $_SESSION["admin"] !== true) {
+    die("Ei oikeuksia");
+}
+
+// Tarinan ID URL:sta
+if (!isset($_GET["id"])) {
+    die("Virhe: ID puuttuu");
+}
+
+$id = $_GET["id"];
+?>
+
 <!DOCTYPE html>
 <html lang="fi">
 <head>
