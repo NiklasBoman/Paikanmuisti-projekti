@@ -252,6 +252,73 @@ font-weight: 500;
     background-color: #005fa3;
 }
 
+/*kuva-arkisto*/
+.kuva-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.kuva-item {
+    background: #fff;
+    padding: 16px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+.arkisto-kuva {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.arkisto-kuva:hover {
+    transform: scale(1.03);
+}
+
+/* Lightbox */
+.lightbox {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+}
+
+.lightbox img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 10px;
+}
+
+/* Lisää kuva -painike */
+.lisaa-kuva-btn {
+    display: inline-block;
+    margin-bottom: 20px;
+    padding: 10px 18px;
+    background-color: #0077cc;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+
+.lisaa-kuva-btn:hover {
+    background-color: #005fa3;
+    transform: scale(1.03);
+}
 
 
 /* Mobiili */
@@ -302,7 +369,7 @@ input[type="text"] {
     box-sizing: border-box;
 }
 
-/* Tausta + keskitys */
+/* admin login */
 .login-wrapper {
     position: fixed;
     top: 0;
