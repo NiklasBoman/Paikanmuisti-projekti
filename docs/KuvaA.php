@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 
@@ -50,6 +51,15 @@ $kuvat = $stmt->fetchAll(PDO::FETCH_ASSOC);
              class="arkisto-kuva">
 
         <p><?php echo nl2br(htmlspecialchars($kuva["kuvaus"])); ?></p>
+
+        <!-- POISTA-PAINIKE ADMINILLE -->
+        <?php if (!empty($_SESSION["admin"])): ?>
+          <a href="poista_kuva.php?id=<?php echo $kuva['id']; ?>" 
+             class="poista-kuva-btn" 
+             onclick="return confirm('Poistaatko tämän kuvan?');">
+             Poista kuva
+          </a>
+        <?php endif; ?>
       </div>
     <?php endforeach; ?>
   </div>
