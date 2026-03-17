@@ -464,3 +464,105 @@ input[type="text"] {
     color: #d10000;
     font-weight: bold;
 }
+
+/* Kuvan lisäämisen lomake */
+.form-container {
+    padding: 32px;
+    background: #fafafa;
+    min-height: calc(100vh - 5vh);
+}
+
+.form-card {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 32px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.form-card h2 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    font-size: 24px;
+    color: #222;
+}
+
+.kuva-form .form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.kuva-form label {
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.kuva-form input[type="text"],
+.kuva-form input[type="file"],
+.kuva-form textarea {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: 0.2s;
+}
+
+.kuva-form input[type="text"]:focus,
+.kuva-form input[type="file"]:focus,
+.kuva-form textarea:focus {
+    border-color: #0078ff;
+    box-shadow: 0 0 6px rgba(0,120,255,0.2);
+    outline: none;
+}
+
+.kuva-form textarea {
+    resize: vertical;
+    font-family: Arial, sans-serif;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.form-actions button {
+    flex: 1;
+    padding: 12px 20px;
+    background-color: #0077cc;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.form-actions button:hover {
+    background-color: #005fa3;
+    transform: scale(1.02);
+}
+
+.btn-cancel {
+    flex: 1;
+    padding: 12px 20px;
+    background-color: #999;
+    color: white;
+    text-decoration: none;
+    text-align: center;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-cancel:hover {
+    background-color: #777;
+    transform: scale(1.02);
+}
