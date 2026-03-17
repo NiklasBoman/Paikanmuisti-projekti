@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 // YHDISTÄÄ TIETOKANTAAN
 $pdo = new PDO(
     "mysql:host=localhost;dbname=paikanmuisti;charset=utf8mb4",
@@ -33,6 +35,11 @@ $kuvat = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <section class="tarinat">
   <h2>Kuva‑arkisto</h2>
 
+  <!-- ADMINILLE LISÄÄ-KUVA PAINIKE -->
+  <?php if (!empty($_SESSION["admin"])): ?>
+      <a href="kuvalisays.php" class="lisaa-kuva-btn">+ Lisää kuva</a>
+  <?php endif; ?>
+
   <div class="kuva-list">
     <?php foreach ($kuvat as $kuva): ?>
       <div class="kuva-item">
@@ -48,6 +55,26 @@ $kuvat = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
 
 </section>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+    <img id="lightbox-img" src="">
+</div>
+
+<script>
+// Avaa kuva lightboxiin
+document.querySelectorAll(".arkisto-kuva").forEach(img => {
+    img.addEventListener("click", () => {
+        document.getElementById("lightbox-img").src = img.src;
+        document.getElementById("lightbox").style.display = "flex";
+    });
+});
+
+// Sulje lightbox klikkaamalla taustaa
+document.getElementById("lightbox").addEventListener("click", () => {
+    document.getElementById("lightbox").style.display = "none";
+});
+</script>
 
 </body>
 </html>
