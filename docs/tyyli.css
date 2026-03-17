@@ -320,6 +320,24 @@ font-weight: 500;
     transform: scale(1.03);
 }
 
+.poista-kuva-btn {
+    display: inline-block;
+    margin-top: 12px;
+    margin-left: 6px;
+    padding: 8px 14px;
+    background-color: #cc3300;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 6px;
+    transition: 0.2s;
+    font-size: 14px;
+}
+
+.poista-kuva-btn:hover {
+    background-color: #bb2200;
+    transform: scale(1.03);
+}
 
 /* Mobiili */
 @media (max-width: 1000px) {
