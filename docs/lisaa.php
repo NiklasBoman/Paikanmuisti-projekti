@@ -17,6 +17,8 @@ $id = "new_" . time();
 <title>Lisää tarina</title>
 <link rel="stylesheet" href="tyyli.css">
 </head>
+<link rel="stylesheet" href="Tyyli.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <body>
 
 <nav>
@@ -30,21 +32,29 @@ $id = "new_" . time();
   </ul>
 </nav>
 
-<section class="tarinat">
-  <h2>Lisää uusi tarina</h2>
+<section class="form-container">
+  <div class="form-card">
+    <h2>Lisää uusi tarina</h2>
 
-  <form method="POST" action="tallenna.php">
-    <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
+    <form method="POST" action="tallenna.php" class="kuva-form">
+      <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
 
-    <label>Paikka:</label><br>
-    <input type="text" name="paikka" style="width:300px;" required><br><br>
+      <div class="form-group">
+        <label for="paikka">Paikka:</label>
+        <input type="text" id="paikka" name="paikka" required>
+      </div>
 
-    <label>Kuvaus:</label><br>
-    <textarea name="kuvaus" style="width:500px; height:300px;" required></textarea><br><br>
+      <div class="form-group">
+        <label for="kuvaus">Kuvaus:</label>
+        <textarea id="kuvaus" name="kuvaus" rows="8" required></textarea>
+      </div>
 
-    <button type="submit">Lisää tarina</button>
-    <a href="tarinat.php">Peruuta</a>
-  </form>
+      <div class="form-actions">
+        <button type="submit">Lisää tarina</button>
+        <a href="tarinat.php" class="btn-cancel">Peruuta</a>
+      </div>
+    </form>
+  </div>
 </section>
 
 </body>
