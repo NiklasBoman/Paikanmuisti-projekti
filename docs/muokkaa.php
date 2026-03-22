@@ -103,7 +103,7 @@ if (!$tarina && file_exists($jsonFile)) {
 
 // --- JOS EI LÖYDY MISTÄÄN ---
 if (!$tarina) {
-    die("Tarinaa ei löytynyt (ei alkuperäisistä eikä JSON:ista)");
+    die("Tarinaa ei löytynyt");
 }
 
 // --- KORVAA TARINA JSON-VERSIOLLA JOS OLEMASSA ---
@@ -141,7 +141,8 @@ if (file_exists($jsonFile)) {
         echo htmlspecialchars($tarina["kuvaus"]); 
     ?></textarea><br><br>
 
-    <button type="submit">Tallenna muutokset</button> 
+    <button type="submit">Tallenna muutokset</button>
+    <br><br>
     <a href="tarinat.php">Peruuta</a>
 </form>
 
