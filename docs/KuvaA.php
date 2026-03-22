@@ -52,6 +52,11 @@ $kuvat = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <p><?php echo nl2br(htmlspecialchars($kuva["kuvaus"])); ?></p>
 
+        <!-- MUOKKAA-PAINIKE ADMINILLE -->
+        <?php if (!empty($_SESSION["admin"])): ?>
+          <button class="muokkaa-kuvaus-btn" data-id="<?php echo $kuva['id']; ?>" data-kuvaus="<?php echo htmlspecialchars($kuva['kuvaus']); ?>">Muokkaa kuvausta</button>
+        <?php endif; ?>
+
         <!-- POISTA-PAINIKE ADMINILLE -->
         <?php if (!empty($_SESSION["admin"])): ?>
           <a href="poista_kuva.php?id=<?php echo $kuva['id']; ?>" 
@@ -83,6 +88,77 @@ document.querySelectorAll(".arkisto-kuva").forEach(img => {
 // Sulje lightbox klikkaamalla taustaa
 document.getElementById("lightbox").addEventListener("click", () => {
     document.getElementById("lightbox").style.display = "none";
+});
+
+// Muokkaa kuvausta
+document.querySelectorAll(".muokkaa-kuvaus-btn").forEach(btn => {
+    btn.addEventListener("click", function() {
+        const item = this.closest(".kuva-item");
+        const p = item.querySelector("p");
+        const originalText = this.dataset.kuvaus;
+        const id = this.dataset.id;
+
+        // Piilota p ja nappi
+        p.style.display = "none";
+        this.style.display = "none";
+
+        // Luo textarea
+        const textarea = document.createElement("textarea");
+        textarea.value = originalText;
+        textarea.rows = 4;
+        textarea.style.width = "100%";
+        textarea.style.boxSizing = "border-box";
+
+        // Luo tallenna nappi
+        const saveBtn = document.createElement("button");
+        saveBtn.textContent = "Tallenna";
+        saveBtn.className = "muokkaa-kuvaus-btn";
+        saveBtn.style.marginRight = "6px";
+
+        // Luo peruuta nappi
+        const cancelBtn = document.createElement("button");
+        cancelBtn.textContent = "Peruuta";
+        cancelBtn.className = "poista-kuva-btn";
+
+        // Lisää elementit
+        p.parentNode.insertBefore(textarea, p.nextSibling);
+        p.parentNode.insertBefore(saveBtn, textarea.nextSibling);
+        p.parentNode.insertBefore(cancelBtn, saveBtn.nextSibling);
+
+        // Tallenna
+        saveBtn.addEventListener("click", () => {
+            const newKuvaus = textarea.value;
+            fetch("muokkaa_kuva.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `id=${id}&kuvaus=${encodeURIComponent(newKuvaus)}`
+            })
+            .then(response => response.text())
+            .then(result => {
+                if (result === "success") {
+                    p.innerHTML = newKuvaus.replace(/\n/g, '<br>');
+                    this.dataset.kuvaus = newKuvaus;
+                    // Näytä takaisin
+                    p.style.display = "block";
+                    this.style.display = "inline-block";
+                    textarea.remove();
+                    saveBtn.remove();
+                    cancelBtn.remove();
+                } else {
+                    alert("Virhe tallennuksessa");
+                }
+            });
+        });
+
+        // Peruuta
+        cancelBtn.addEventListener("click", () => {
+            p.style.display = "block";
+            this.style.display = "inline-block";
+            textarea.remove();
+            saveBtn.remove();
+            cancelBtn.remove();
+        });
+    });
 });
 </script>
 
