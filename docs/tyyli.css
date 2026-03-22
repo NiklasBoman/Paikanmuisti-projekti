@@ -339,6 +339,27 @@ font-weight: 500;
     transform: scale(1.03);
 }
 
+.muokkaa-kuvaus-btn {
+    display: inline-block;
+    margin-top: 12px;
+    margin-left: 6px;
+    padding: 8px 14px;
+    background-color: #0077cc;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 6px;
+    transition: 0.2s;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+}
+
+.muokkaa-kuvaus-btn:hover {
+    background-color: #005fa3;
+    transform: scale(1.03);
+}
+
 /* Mobiili */
 @media (max-width: 1000px) {
     .info {
@@ -518,6 +539,27 @@ input[type="text"] {
     box-shadow: 0 0 6px rgba(0,120,255,0.2);
     outline: none;
 }
+
+.kuva-form .form-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.kuva-form .btn-cancel {
+    background-color: #ccc;
+    color: #222;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+
+.kuva-form .btn-cancel:hover {
+    background-color: #999;
+}
+
 
 .kuva-form textarea {
     resize: vertical;
