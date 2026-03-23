@@ -28,12 +28,6 @@ const paikat = [
     lat: 62.95556,
     lng: 26.75556,
     kuvaus: "Tervon keskusta."
-  },
-  {
-    nimi: "Esimerkkipaikka",
-    lat: 62.95700,
-    lng: 26.76000,
-    kuvaus: "kuvaus."
   }
 ];
 
