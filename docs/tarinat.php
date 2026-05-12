@@ -2,6 +2,50 @@
 session_start();
 $isAdmin = isset($_SESSION["admin"]) && $_SESSION["admin"] === true;
 
+function tm35_to_wgs84($northing, $easting) {
+    $a = 6378137.0;
+    $f = 1 / 298.257222101;
+    $e2 = $f * (2 - $f);
+    $k0 = 0.9996;
+    $lambda0 = deg2rad(27.0);
+    $falseEasting = 500000.0;
+
+    $N = $northing;
+    $E = $easting - $falseEasting;
+
+    $M = $N / $k0;
+    $a0 = 1 - $e2 / 4 - 3 * pow($e2, 2) / 64 - 5 * pow($e2, 3) / 256;
+    $a1 = 3 / 8.0 * ($e2 + pow($e2, 2) / 4 + 15 * pow($e2, 3) / 128);
+    $a2 = 15 / 256.0 * (pow($e2, 2) + 3 * pow($e2, 3) / 4);
+    $a3 = 35 * pow($e2, 3) / 3072.0;
+
+    $mu = $M / ($a * $a0);
+    $phi1 = $mu + $a1 * sin(2 * $mu) + $a2 * sin(4 * $mu) + $a3 * sin(6 * $mu);
+
+    $sinPhi1 = sin($phi1);
+    $cosPhi1 = cos($phi1);
+    $tanPhi1 = tan($phi1);
+    $N1 = $a / sqrt(1 - $e2 * $sinPhi1 * $sinPhi1);
+    $R1 = $a * (1 - $e2) / pow(1 - $e2 * $sinPhi1 * $sinPhi1, 1.5);
+    $ePrimeSq = $e2 / (1 - $e2);
+    $C1 = $ePrimeSq * pow($cosPhi1, 2);
+    $D = $E / ($N1 * $k0);
+
+    $phi = $phi1 - ($N1 * $tanPhi1 / $R1) * (
+        $D * $D / 2
+        - (5 + 3 * $tanPhi1 * $tanPhi1 + 10 * $C1 - 4 * $C1 * $C1 - 9 * $ePrimeSq) * pow($D, 4) / 24
+        + (61 + 90 * $tanPhi1 * $tanPhi1 + 298 * $C1 + 45 * pow($tanPhi1, 4) - 252 * $ePrimeSq - 3 * $C1 * $C1) * pow($D, 6) / 720
+    );
+
+    $lambda = $lambda0 + (
+        $D
+        - (1 + 2 * $tanPhi1 * $tanPhi1 + $C1) * pow($D, 3) / 6
+        + (5 - 2 * $C1 + 28 * $tanPhi1 * $tanPhi1 - 3 * $C1 * $C1 + 8 * $ePrimeSq + 24 * pow($tanPhi1, 4)) * pow($D, 5) / 120
+    ) / $cosPhi1;
+
+    return [rad2deg($phi), rad2deg($lambda)];
+}
+
 // 1. FUNKTIO: LUE JA PARSETA TARINAT YHDESTÄ TIEDOSTOSTA
 function lue_tarinat_tiedostosta($filename) {
 
@@ -19,10 +63,7 @@ function lue_tarinat_tiedostosta($filename) {
     for ($i = 0; $i < count($matches[1]); $i++) {
 
         $id_base = $matches[1][$i];
-        $content = trim($matches[2][$i]);
-
-        // Poista roskamerkit
-        $content = preg_replace('/[\x00-\x1F\x7F\x80-\x9F�]/u', '', $content);
+        $content = $matches[2][$i];
 
         // Jokainen <b>Nimi:</b> tai <b>Paikka:</b> aloittaa uuden tarinan
         $parts = preg_split('/(?=<b>(Nimi|Paikka):\s*<\/b>)/i', $content, -1, PREG_SPLIT_NO_EMPTY);
@@ -49,12 +90,25 @@ function lue_tarinat_tiedostosta($filename) {
             $firstLetter = strtoupper(mb_substr($paikka, 0, 1));
 
             // Luo tarina
-            $tarinat[] = [
+            $tarina = [
                 "id" => $id_base . "_" . $index,
                 "paikka" => $paikka,
                 "firstLetter" => $firstLetter,
-                "kuvaus" => $part
+                "kuvaus" => $part,
+                "northing" => null,
+                "easting" => null,
+                "lat" => null,
+                "lng" => null
             ];
+
+            // Parse coordinates if present (handles both old and new format)
+            if (preg_match('/<b>Koordinaatit\s*(?:\([^)]*\))?:\s*<\/b>\s*N\s*([0-9.]+),\s*E\s*([0-9.]+)/i', $part, $coordMatches)) {
+                $tarina['northing'] = floatval($coordMatches[1]);
+                $tarina['easting'] = floatval($coordMatches[2]);
+                list($tarina['lat'], $tarina['lng']) = tm35_to_wgs84($tarina['northing'], $tarina['easting']);
+            }
+
+            $tarinat[] = $tarina;
         }
     }
 
@@ -73,7 +127,7 @@ $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("J_t.php"));
 // Poista tyhjät
 $tarinat = array_filter($tarinat, fn($t) => trim(strip_tags($t["kuvaus"])) !== "");
 
-// 3.5 KORVAA TARINAT JSON-TIEDOSTON MUOKATUILLA VERSIOILLA
+// 3.5 REPLACE STORIES WITH EDITED VERSIONS FROM JSON (only paikka/kuvaus, not coordinates for static stories)
 $jsonFile = "tarinat.json";
 if (file_exists($jsonFile)) {
     $jsonContent = file_get_contents($jsonFile);
@@ -82,12 +136,23 @@ if (file_exists($jsonFile)) {
     if (is_array($muokatut)) {
         foreach ($tarinat as &$t) {
             if (isset($muokatut[$t["id"]])) {
+                // For static stories: only update paikka/kuvaus if provided, keep coordinates from _t.php
+                // For new stories: use all JSON data
                 $t["paikka"] = $muokatut[$t["id"]]["paikka"];
                 $t["kuvaus"] = $muokatut[$t["id"]]["kuvaus"];
+                
+                // Only update coordinates if this is a new story (not from _t.php)
+                // Static stories should keep their coordinates from _t.php files
+                if ($muokatut[$t["id"]]["northing"] !== null && $t["northing"] === null) {
+                    $t["northing"] = $muokatut[$t["id"]]["northing"];
+                    $t["easting"] = $muokatut[$t["id"]]["easting"];
+                    $t["lat"] = $muokatut[$t["id"]]["lat"];
+                    $t["lng"] = $muokatut[$t["id"]]["lng"];
+                }
             }
         }
 
-        // LISÄÄ UUDET TARINAT JSON:STA
+        // ADD NEW STORIES FROM JSON
         foreach ($muokatut as $id => $data) {
             $found = false;
             foreach ($tarinat as $t) {
@@ -102,7 +167,11 @@ if (file_exists($jsonFile)) {
                     "id" => $id,
                     "paikka" => $data["paikka"],
                     "firstLetter" => $firstLetter,
-                    "kuvaus" => $data["kuvaus"]
+                    "kuvaus" => $data["kuvaus"],
+                    "northing" => isset($data["northing"]) ? $data["northing"] : null,
+                    "easting" => isset($data["easting"]) ? $data["easting"] : null,
+                    "lat" => isset($data["lat"]) ? $data["lat"] : null,
+                    "lng" => isset($data["lng"]) ? $data["lng"] : null
                 ];
             }
         }
@@ -151,7 +220,7 @@ usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
 </nav>
 
 <section class="tarinat">
-  <h2>Arkisto</h2>
+  <h2>Tarinat</h2>
 
   <!-- HAKU -->
   <form method="GET" class="haku">
@@ -180,6 +249,22 @@ usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
     </h3>
 
     <?php echo $tarina["kuvaus"]; ?>
+    <?php if ((isset($tarina["northing"], $tarina["easting"]) && $tarina["northing"] !== null && $tarina["easting"] !== null) || (isset($tarina["lat"], $tarina["lng"]) && $tarina["lat"] !== null && $tarina["lng"] !== null)): ?>
+        <p><strong>Koordinaatit:</strong>
+        <?php if (isset($tarina["northing"], $tarina["easting"]) && $tarina["northing"] !== null && $tarina["easting"] !== null): ?>
+            N <?php echo htmlspecialchars($tarina["northing"] ?? ''); ?>, E <?php echo htmlspecialchars($tarina["easting"] ?? ''); ?>
+        <?php else: ?>
+            <?php echo htmlspecialchars($tarina["lat"]); ?>, <?php echo htmlspecialchars($tarina["lng"]); ?>
+        <?php endif; ?>
+        </p>
+        <?php
+            $karttaQuery = 'story=' . urlencode($tarina['id']);
+            if (isset($tarina['lat'], $tarina['lng']) && is_numeric($tarina['lat']) && is_numeric($tarina['lng'])) {
+                $karttaQuery .= '&lat=' . urlencode($tarina['lat']) . '&lng=' . urlencode($tarina['lng']);
+            }
+        ?>
+        <p><a href="kartta.php?<?php echo $karttaQuery; ?>">Näytä kartalla</a></p>
+    <?php endif; ?>
 </div>
     <?php endforeach; ?>
   </div>

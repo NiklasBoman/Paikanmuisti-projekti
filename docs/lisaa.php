@@ -49,6 +49,19 @@ $id = "new_" . time();
         <textarea id="kuvaus" name="kuvaus" rows="8" required></textarea>
       </div>
 
+      <div class="form-group">
+        <label for="lat">Y-koordinaatti (N, TM35):</label>
+        <input type="text" id="lat" name="lat" placeholder="6971222,908" style="width:200px;">
+      </div>
+
+      <div class="form-group">
+        <label for="lng">X-koordinaatti (E, TM35):</label>
+        <input type="text" id="lng" name="lng" placeholder="489268,988" style="width:200px;">
+      </div>
+      <small>Syötä TM35-arvot, esimerkiksi <code>N 6971222,908</code> ja <code>E 489268,988</code>. Tämä sivusto käyttää vain TM35-koordinaatteja.</small>
+      <div id="map" style="width:100%; height:320px; margin-top:20px;">
+      </div>
+
       <div class="form-actions">
         <button type="submit">Lisää tarina</button>
         <a href="tarinat.php" class="btn-cancel">Peruuta</a>
@@ -56,6 +69,18 @@ $id = "new_" . time();
     </form>
   </div>
 </section>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+const addMap = L.map('map').setView([62.95556, 26.75556], 12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: ''
+}).addTo(addMap);
+let addMarker = null;
+// Map click is disabled because this form expects TM35 coordinates only.
+// Enter the TM35 northing/easting values manually.
+</script>
 
 </body>
 </html></content>

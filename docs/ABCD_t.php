@@ -1770,8 +1770,7 @@ talvitie. </p>
 M&auml;enp&auml;&auml;n torpassa. </p>
 </div> <div id='c15' style="display:none;">
 <p><b>Paikka: </b> Lehtosaari <br />
-<b>Kuvaus: </b> Lehtipuita kasvava saari Niinivedess&auml;. </p>
-</div> <div id='c16' style="display:none;">
+<b>Kuvaus: </b> Lehtipuita kasvava saari Niinivedess&auml;. </p><br><b>Koordinaatit (TM35):</b> N 6968434.715, E 483840.338</div> <div id='c16' style="display:none;">
 <p><b>Paikka: </b> Tarvaisensuo <br />
 <b>Kuvaus: </b> Suo, joka on entist&auml; peltoa. <br />
 <b>Perim&auml;tietoa: </b> Pellon laidassa on ollut m&ouml;kki, jossa on asunut Tarvaisia. M&ouml;kiss&auml; on asunut 
@@ -2356,13 +2355,11 @@ Pätkälän lähellä on ollut Jalmari ja Helmi Jäntin yhden huoneen mökki. Jalmari j
 <b>Paikka:</b> Munasaari<br />
 <b>Kuvaus: </b>Pieni kananmunan muotoinen saari Iisvedessä Majalahden edustalla.<br />
 
-</div><div id='d77' style="display:none;"><br />
+</div><div id="d77" style="display:none;"><br />
 <b>Paikka: </b>Majalahti<br />
 <b>Kuvaus: </b>Iisvedessä Syvänniemen itäosassa oleva lahti.<br />
 <b>Muita paikkaan liittyviä nimiä: </b>Majalahden lounaispuolella on Majaniemi.<br />
-<b>Perimätietoa: </b>Lahden haapoja kasvavilla rannoilla on elänyt ennen majavia (Ukko Hentunen s.1922, 1981).
-
-</div><div id='d78' style="display:none;"><br />
+<b>Perimätietoa: </b>Lahden haapoja kasvavilla rannoilla on elänyt ennen majavia (Ukko Hentunen s.1922, 1981).<br><b>Koordinaatit (TM35):</b> N 6971025.232, E 489143.876</div><div id='d78' style="display:none;"><br />
 <b>Paikka: </b>Kumpulahti<br />
 <b>Rinnakkaisnimi:</b> Pöystin Arvi<br />
 <b>Kuvaus:</b> Vekaron Heikkilästä erotettu tila, joka on saanut kutsumanimensä asukkaan mukaan.<br />
@@ -2447,13 +2444,11 @@ Pätkälän lähellä on ollut Jalmari ja Helmi Jäntin yhden huoneen mökki. Jalmari j
 <b>Paikka: </b>Tinatuoppi<br />
 <b>Kuvaus: </b>Apaja Iisveden pohjoispäässä Matinniemen kärjen länsipuolella.<br />
 
-</div><div id='d89' style="display:none;"><br />
+</div><div id="d89" style="display:none;"><br />
 <b>Paikka:</b> Tynnyrilahti<br />
 <b>Kuvaus: </b>Pitkä ja kapeahko lahti Iisvedessä Haapaniemen ja Tynnyrinniemen välissä.<br />
 <b>Muita paikkaan liittyviä nimiä:</b> Tynnyrinlahden eteläpuolella on Tynnyrinniemi<br />
-<b>Perimätietoa: </b>”Se on syvä niin ku tynnyr se lahti” (Ukko Hentunen s.1922, 1981). Lahti muistuttaa muodoltaa tynnyriä.
-
-</div><div id='d90' style="display:none;">
+<b>Perimätietoa: </b>”Se on syvä niin ku tynnyr se lahti” (Ukko Hentunen s.1922, 1981). Lahti muistuttaa muodoltaa tynnyriä.<br><b>Koordinaatit (TM35):</b> N 6971222.908, E 489268.988</div><div id='d90' style="display:none;">
 <b>Paikka:</b> Rantometsä<br />
 <b>Kuvaus:</b> Metsä Niiniveden reunassa.<br />
 <b>Muita paikkaan liittyviä nimiä: </b>Rantometsän laidassa järven puolella on loiva harjanne nimeltään Rantoharju. Rantoharju on myös rannassa olevan huvilan nimi. Laajasta Rantometsän poikki Rantoharjulle vie Rantotie. Rantometsän eteläpuolella on Rantopelto. Niinivedessä on myös Rantosaari-niminen saari.

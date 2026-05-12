@@ -61,7 +61,7 @@ $kuvat = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php if (!empty($_SESSION["admin"])): ?>
           <a href="poista_kuva.php?id=<?php echo $kuva['id']; ?>" 
              class="poista-kuva-btn" 
-             onclick="return confirm('Poistaatko tämän kuvan?');">
+             onclick="return confirm('Poistatko tämän kuvan?');">
              Poista kuva
           </a>
         <?php endif; ?>
