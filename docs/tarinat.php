@@ -127,7 +127,6 @@ $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("J_t.php"));
 // Poista tyhjät
 $tarinat = array_filter($tarinat, fn($t) => trim(strip_tags($t["kuvaus"])) !== "");
 
-// 3.5 REPLACE STORIES WITH EDITED VERSIONS FROM JSON (only paikka/kuvaus, not coordinates for static stories)
 $jsonFile = "tarinat.json";
 if (file_exists($jsonFile)) {
     $jsonContent = file_get_contents($jsonFile);
@@ -136,13 +135,11 @@ if (file_exists($jsonFile)) {
     if (is_array($muokatut)) {
         foreach ($tarinat as &$t) {
             if (isset($muokatut[$t["id"]])) {
-                // For static stories: only update paikka/kuvaus if provided, keep coordinates from _t.php
-                // For new stories: use all JSON data
+
                 $t["paikka"] = $muokatut[$t["id"]]["paikka"];
                 $t["kuvaus"] = $muokatut[$t["id"]]["kuvaus"];
                 
-                // Only update coordinates if this is a new story (not from _t.php)
-                // Static stories should keep their coordinates from _t.php files
+
                 if ($muokatut[$t["id"]]["northing"] !== null && $t["northing"] === null) {
                     $t["northing"] = $muokatut[$t["id"]]["northing"];
                     $t["easting"] = $muokatut[$t["id"]]["easting"];
@@ -152,7 +149,7 @@ if (file_exists($jsonFile)) {
             }
         }
 
-        // ADD NEW STORIES FROM JSON
+        //UUDET TARINAT JSON:STA (EI OLE ALKUPERÄISISSÄ TIEDOSTOISSA)
         foreach ($muokatut as $id => $data) {
             $found = false;
             foreach ($tarinat as $t) {
