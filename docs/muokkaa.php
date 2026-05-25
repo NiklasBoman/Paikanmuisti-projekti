@@ -2,19 +2,33 @@
 <?php
 session_start();
 
-// Vain admin saa muokata
+function normalize_story_id($id) {
+    $id = trim($id);
+    if ($id === '') {
+        return 'story';
+    }
+
+    $converted = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $id);
+    if ($converted !== false) {
+        $id = $converted;
+    }
+
+    $id = preg_replace('/[^A-Za-z0-9_-]+/', '_', $id);
+    $id = preg_replace('/_+/', '_', $id);
+    $id = trim($id, '_');
+    return $id === '' ? 'story' : $id;
+}
+
 if (!isset($_SESSION["admin"]) || $_SESSION["admin"] !== true) {
     die("Ei oikeuksia");
 }
 
-// Tarinan ID URL:sta
 if (!isset($_GET["id"])) {
     die("Virhe: ID puuttuu");
 }
 
-$id = $_GET["id"];
+$id = normalize_story_id($_GET["id"]);
 
-// Tarinoiden lukeminen tiedostoista
 function lue_tarinat_tiedostosta($filename) {
 
     if (!file_exists($filename)) return [];
@@ -28,14 +42,16 @@ function lue_tarinat_tiedostosta($filename) {
 
     for ($i = 0; $i < count($matches[1]); $i++) {
 
-        $id_base = $matches[1][$i];
+        $id_base_raw = $matches[1][$i];
+        $id_base = normalize_story_id($id_base_raw);
         $content = trim($matches[2][$i]);
 
         $content = preg_replace('/[\x00-\x1F\x7F\x80-\x9F�]/u', '', $content);
 
         $parts = preg_split('/(?=<b>(Nimi|Paikka):\s*<\/b>)/i', $content, -1, PREG_SPLIT_NO_EMPTY);
 
-        foreach ($parts as $index => $part) {
+        $partIndex = 0;
+        foreach ($parts as $part) {
 
             $paikka = "";
 
@@ -54,7 +70,7 @@ function lue_tarinat_tiedostosta($filename) {
             $firstLetter = strtoupper(mb_substr($paikka, 0, 1));
 
             $tarinat[] = [
-                "id" => $id_base . "_" . $index,
+                "id" => $id_base . "_" . $partIndex,
                 "paikka" => $paikka,
                 "firstLetter" => $firstLetter,
                 "kuvaus" => $part
@@ -74,16 +90,14 @@ $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("E_t.php"));
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("HIGF_t.php"));
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("J_t.php"));
 
-// Etsi tarina
 $tarina = null;
 foreach ($tarinat as $t) {
-    if ($t["id"] === $id) {
+    if (normalize_story_id($t["id"]) === $id) {
         $tarina = $t;
         break;
     }
 }
 
-// Jos tarina ei ole alkuperäisessä tiedostossa, etsi JSON:sta
 $jsonFile = "tarinat.json";
 
 if (!$tarina && file_exists($jsonFile)) {
@@ -100,15 +114,27 @@ if (!$tarina && file_exists($jsonFile)) {
             "lat" => isset($muokatut[$id]["lat"]) ? $muokatut[$id]["lat"] : null,
             "lng" => isset($muokatut[$id]["lng"]) ? $muokatut[$id]["lng"] : null
         ];
+    } else {
+        foreach ($muokatut as $existingKey => $existingStory) {
+            if (normalize_story_id($existingKey) === $id) {
+                $tarina = [
+                    "id" => $existingKey,
+                    "paikka" => $existingStory["paikka"],
+                    "kuvaus" => $existingStory["kuvaus"],
+                    "firstLetter" => strtoupper(mb_substr($existingStory["paikka"], 0, 1)),
+                    "lat" => isset($existingStory["lat"]) ? $existingStory["lat"] : null,
+                    "lng" => isset($existingStory["lng"]) ? $existingStory["lng"] : null
+                ];
+                break;
+            }
+        }
     }
 }
 
-// Jos tarinaa ei löydy mistään, lopeta
 if (!$tarina) {
     die("Tarinaa ei löytynyt");
 }
 
-// Etsi tarinan koordinaatit
 $northing = null;
 $easting = null;
 $lat = null;
@@ -137,7 +163,6 @@ if (isset($tarina["kuvaus"])) {
         $a3 = 35 * pow($e2, 3) / 3072.0;
         
         $mu = $M / ($a * $a0);
-        $phi1 = $mu + $a1 * sin(2 * $mu) + $a2 * sin(4 * $mu) + $a3 * sin(6 * $mu);
         
         $sinPhi1 = sin($phi1);
         $cosPhi1 = cos($phi1);
@@ -165,7 +190,7 @@ if (isset($tarina["kuvaus"])) {
     }
 }
 
-// Jos JSON-versio on olemassa, käytä sitä vain uusille tarinoille
+// Jos JSON-versio on olemassa, käytä sitä uusille tarinoille
 if (file_exists($jsonFile)) {
     $jsonContent = file_get_contents($jsonFile);
     $muokatut = json_decode($jsonContent, true);
@@ -192,37 +217,62 @@ $tarina["lng"] = $lng;
 <head>
 <meta charset="UTF-8">
 <title>Muokkaa tarinaa</title>
+<link rel="stylesheet" href="tyyli.css">
 </head>
-<link rel="stylesheet" href="Tyyli.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <body>
 
-<h2>Muokkaa tarinaa</h2>
+<nav>
+  <h2>Paikan Muisti</h2>
+  <ul>
+    <li><a href="kartta.php">Kartta</a></li>
+    <li><a href="tarinat.php">Arkisto</a></li>
+    <li><a href="KuvaA.php">Kuva-arkisto</a></li>
+    <li><a href="info.php">Info</a></li>
+    <li><a href="logout.php">Kirjaudu ulos</a></li>
+  </ul>
+</nav>
 
-<form method="POST" action="tallenna.php">
-    <input type="hidden" name="id" value="<?php echo htmlspecialchars($tarina["id"]); ?>">
+<section class="form-container">
+  <div class="form-card">
+    <h2>Muokkaa tarinaa</h2>
 
-    <label>Paikka:</label><br>
-    <input type="text" name="paikka" value="<?php echo htmlspecialchars($tarina["paikka"]); ?>" style="width:300px;"><br><br>
+    <form method="POST" action="tallenna.php" class="kuva-form">
+      <input type="hidden" name="id" value="<?php echo htmlspecialchars($tarina["id"]); ?>">
 
-    <label>Kuvaus:</label><br>
-    <textarea name="kuvaus" style="width:500px; height:300px;"><?php 
-        echo htmlspecialchars($tarina["kuvaus"]); 
-    ?></textarea><br><br>
+      <div class="form-group">
+        <label for="paikka">Paikka:</label>
+        <input type="text" id="paikka" name="paikka" value="<?php echo htmlspecialchars($tarina["paikka"]); ?>" class="edit-input">
+      </div>
 
-    <label>N-koordinaatti:</label><br>
-    <input type="text" id="lat" name="lat" value="<?php echo htmlspecialchars($tarina["northing"] ?? ''); ?>" style="width:200px;"><br><br>
+      <div class="form-group">
+        <label for="kuvaus">Kuvaus:</label>
+        <textarea id="kuvaus" name="kuvaus" class="edit-textarea"><?php 
+          echo htmlspecialchars($tarina["kuvaus"]); 
+        ?></textarea>
+      </div>
 
-    <label>E-koordinaatti:</label><br>
-    <input type="text" id="lng" name="lng" value="<?php echo htmlspecialchars($tarina["easting"] ?? ''); ?>" style="width:200px;"><br>
-    <small>Syötä N- ja E-koordinaatit muodossa <code>N 6971222,908</code> ja <code>E 489268,988</code>.</small><br><br>
+      <div class="form-group">
+        <label for="lat">N-koordinaatti:</label>
+        <input type="text" id="lat" name="lat" value="<?php echo htmlspecialchars($tarina["northing"] ?? ''); ?>" class="coord-input">
+      </div>
 
-    <div id="map" style="width:100%; height:320px; margin-bottom:20px;"></div>
+      <div class="form-group">
+        <label for="lng">E-koordinaatti:</label>
+        <input type="text" id="lng" name="lng" value="<?php echo htmlspecialchars($tarina["easting"] ?? ''); ?>" class="coord-input">
+      </div>
 
-    <button type="submit">Tallenna muutokset</button>
-    <br><br>
-    <a href="tarinat.php">Peruuta</a>
-</form>
+      <small>Syötä N- ja E-koordinaatit muodossa <code>N 6971222,908</code> ja <code>E 489268,988</code>.</small>
+
+      <div id="map" class="form-map"></div>
+
+      <div class="form-actions">
+        <button type="submit">Tallenna muutokset</button>
+        <a href="tarinat.php" class="btn-cancel">Peruuta</a>
+      </div>
+    </form>
+  </div>
+</section>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>

@@ -46,31 +46,45 @@ function tm35_to_wgs84($northing, $easting) {
     return [rad2deg($phi), rad2deg($lambda)];
 }
 
-// 1. FUNKTIO: LUE JA PARSETA TARINAT YHDESTÄ TIEDOSTOSTA
+function normalize_story_id($id) {
+    $id = trim($id);
+    if ($id === '') {
+        return 'story';
+    }
+
+    $converted = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $id);
+    if ($converted !== false) {
+        $id = $converted;
+    }
+
+    $id = preg_replace('/[^A-Za-z0-9_-]+/', '_', $id);
+    $id = preg_replace('/_+/', '_', $id);
+    $id = trim($id, '_');
+    return $id === '' ? 'story' : $id;
+}
+
 function lue_tarinat_tiedostosta($filename) {
 
     if (!file_exists($filename)) return [];
 
-    // Lue tiedosto ISO-8859-1 → UTF-8
     $html = file_get_contents($filename);
     $html = mb_convert_encoding($html, 'UTF-8', 'ISO-8859-1');
 
-    // Etsi kaikki <div id="...">...</div>
     preg_match_all('/<div id=[\'"]([^\'"]+)[\'"][^>]*>(.*?)<\/div>/si', $html, $matches);
 
     $tarinat = [];
 
     for ($i = 0; $i < count($matches[1]); $i++) {
 
-        $id_base = $matches[1][$i];
+        $id_base_raw = $matches[1][$i];
+        $id_base = normalize_story_id($id_base_raw);
         $content = $matches[2][$i];
 
-        // Jokainen <b>Nimi:</b> tai <b>Paikka:</b> aloittaa uuden tarinan
         $parts = preg_split('/(?=<b>(Nimi|Paikka):\s*<\/b>)/i', $content, -1, PREG_SPLIT_NO_EMPTY);
 
-        foreach ($parts as $index => $part) {
+        $partIndex = 0;
+        foreach ($parts as $part) {
 
-            // Poimi nimi / paikka
             $paikka = "";
 
             if (preg_match('/<b>Nimi:\s*<\/b>([^<]+)/i', $part, $m)) {
@@ -82,16 +96,13 @@ function lue_tarinat_tiedostosta($filename) {
 
             if ($paikka === "") continue;
 
-            // Dekoodaa entityt
             $paikka = html_entity_decode($paikka, ENT_QUOTES, 'UTF-8');
             $part   = html_entity_decode($part,   ENT_QUOTES, 'UTF-8');
 
-            // Ensimmäinen kirjain
             $firstLetter = strtoupper(mb_substr($paikka, 0, 1));
 
-            // Luo tarina
             $tarina = [
-                "id" => $id_base . "_" . $index,
+                "id" => $id_base . "_" . $partIndex,
                 "paikka" => $paikka,
                 "firstLetter" => $firstLetter,
                 "kuvaus" => $part,
@@ -101,7 +112,6 @@ function lue_tarinat_tiedostosta($filename) {
                 "lng" => null
             ];
 
-            // Parse coordinates if present (handles both old and new format)
             if (preg_match('/<b>Koordinaatit\s*(?:\([^)]*\))?:\s*<\/b>\s*N\s*([0-9.]+),\s*E\s*([0-9.]+)/i', $part, $coordMatches)) {
                 $tarina['northing'] = floatval($coordMatches[1]);
                 $tarina['easting'] = floatval($coordMatches[2]);
@@ -109,13 +119,14 @@ function lue_tarinat_tiedostosta($filename) {
             }
 
             $tarinat[] = $tarina;
+            $partIndex++;
         }
     }
 
     return $tarinat;
 }
 
-// 2. LUE TARINAT TIEDOSTOISTA
+// Lue tarinat tiedostoista
 $tarinat = [];
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("ABCD_t.php"));
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("AEOEAABB_t.php"));
@@ -124,7 +135,6 @@ $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("E_t.php"));
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("HIGF_t.php"));
 $tarinat = array_merge($tarinat, lue_tarinat_tiedostosta("J_t.php"));
 
-// Poista tyhjät
 $tarinat = array_filter($tarinat, fn($t) => trim(strip_tags($t["kuvaus"])) !== "");
 
 $jsonFile = "tarinat.json";
@@ -134,17 +144,28 @@ if (file_exists($jsonFile)) {
 
     if (is_array($muokatut)) {
         foreach ($tarinat as &$t) {
+            $jsonKey = null;
+
             if (isset($muokatut[$t["id"]])) {
+                $jsonKey = $t["id"];
+            } else {
+                foreach ($muokatut as $existingKey => $existingStory) {
+                    if (normalize_story_id($existingKey) === normalize_story_id($t["id"])) {
+                        $jsonKey = $existingKey;
+                        break;
+                    }
+                }
+            }
 
-                $t["paikka"] = $muokatut[$t["id"]]["paikka"];
-                $t["kuvaus"] = $muokatut[$t["id"]]["kuvaus"];
-                
+            if ($jsonKey !== null) {
+                $t["paikka"] = $muokatut[$jsonKey]["paikka"];
+                $t["kuvaus"] = $muokatut[$jsonKey]["kuvaus"];
 
-                if ($muokatut[$t["id"]]["northing"] !== null && $t["northing"] === null) {
-                    $t["northing"] = $muokatut[$t["id"]]["northing"];
-                    $t["easting"] = $muokatut[$t["id"]]["easting"];
-                    $t["lat"] = $muokatut[$t["id"]]["lat"];
-                    $t["lng"] = $muokatut[$t["id"]]["lng"];
+                if (isset($muokatut[$jsonKey]["northing"]) && $muokatut[$jsonKey]["northing"] !== null && $t["northing"] === null) {
+                    $t["northing"] = $muokatut[$jsonKey]["northing"];
+                    $t["easting"] = $muokatut[$jsonKey]["easting"] ?? null;
+                    $t["lat"] = $muokatut[$jsonKey]["lat"] ?? null;
+                    $t["lng"] = $muokatut[$jsonKey]["lng"] ?? null;
                 }
             }
         }
@@ -153,7 +174,7 @@ if (file_exists($jsonFile)) {
         foreach ($muokatut as $id => $data) {
             $found = false;
             foreach ($tarinat as $t) {
-                if ($t["id"] === $id) {
+                if ($t["id"] === $id || normalize_story_id($t["id"]) === normalize_story_id($id)) {
                     $found = true;
                     break;
                 }
@@ -175,7 +196,7 @@ if (file_exists($jsonFile)) {
     }
 }
 
-// 4. HAKU JA KIRJAINSUODATUS
+// Haku ja kirjainsuodatus
 $hakusana = isset($_GET['q']) ? strtolower($_GET['q']) : '';
 
 if ($hakusana !== '') {
@@ -189,7 +210,7 @@ if ($hakusana !== '') {
     $tarinat = array_filter($tarinat, fn($t) => $t["firstLetter"] === $filterLetter);
 }
 
-// 5. JÄRJESTÄ AAKKOSITTAIN
+// Järjestä aakkosittain
 usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
 
 ?>
@@ -219,21 +240,18 @@ usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
 <section class="tarinat">
   <h2>Tarinat</h2>
 
-  <!-- HAKU -->
   <form method="GET" class="haku">
     <input type="text" name="q" placeholder="Hae tarinoita..."
            value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>">
     <button type="submit">Hae</button>
   </form>
 <br>
-<!--TARINAN LISÄYS (ADMIN)-->
   <form>
         <?php if ($isAdmin): ?>
             <a href="lisaa.php" class="add-btn">Lisää tarina</a>
         <?php endif; ?>
   </form>
 
-  <!-- TARINAT -->
   <div class="tarina-list">
     <?php foreach ($tarinat as $tarina): ?>
 <div class="tarina">
@@ -246,19 +264,9 @@ usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
     </h3>
 
     <?php echo $tarina["kuvaus"]; ?>
-    <?php if ((isset($tarina["northing"], $tarina["easting"]) && $tarina["northing"] !== null && $tarina["easting"] !== null) || (isset($tarina["lat"], $tarina["lng"]) && $tarina["lat"] !== null && $tarina["lng"] !== null)): ?>
-        <p><strong>Koordinaatit:</strong>
-        <?php if (isset($tarina["northing"], $tarina["easting"]) && $tarina["northing"] !== null && $tarina["easting"] !== null): ?>
-            N <?php echo htmlspecialchars($tarina["northing"] ?? ''); ?>, E <?php echo htmlspecialchars($tarina["easting"] ?? ''); ?>
-        <?php else: ?>
-            <?php echo htmlspecialchars($tarina["lat"]); ?>, <?php echo htmlspecialchars($tarina["lng"]); ?>
-        <?php endif; ?>
-        </p>
+    <?php if (isset($tarina["lat"], $tarina["lng"]) && is_numeric($tarina["lat"]) && is_numeric($tarina["lng"])): ?>
         <?php
-            $karttaQuery = 'story=' . urlencode($tarina['id']);
-            if (isset($tarina['lat'], $tarina['lng']) && is_numeric($tarina['lat']) && is_numeric($tarina['lng'])) {
-                $karttaQuery .= '&lat=' . urlencode($tarina['lat']) . '&lng=' . urlencode($tarina['lng']);
-            }
+            $karttaQuery = 'story=' . urlencode($tarina['id']) . '&lat=' . urlencode($tarina['lat']) . '&lng=' . urlencode($tarina['lng']);
         ?>
         <p><a href="kartta.php?<?php echo $karttaQuery; ?>">Näytä kartalla</a></p>
     <?php endif; ?>
@@ -266,7 +274,6 @@ usort($tarinat, fn($a, $b) => strcmp($a["paikka"], $b["paikka"]));
     <?php endforeach; ?>
   </div>
 
-  <!-- AAKKOSNAVIGAATIO -->
   <div class="kirjaimet">
     <?php 
     $letters = array_merge(range('A','Z'), ['Å','Ä','Ö']);

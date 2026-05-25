@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Vain admin saa muokata
 if (!isset($_SESSION["admin"]) || $_SESSION["admin"] !== true) {
     die("Ei oikeuksia");
 }

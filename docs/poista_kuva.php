@@ -1,46 +1,40 @@
 <?php
 session_start();
 
-// Vain admin saa poistaa
 if (!isset($_SESSION["admin"]) || $_SESSION["admin"] !== true) {
     die("Ei oikeuksia");
 }
 
-// Kuvan ID URL:sta
 if (!isset($_GET["id"])) {
     die("Virhe: ID puuttuu");
 }
 
 $id = $_GET["id"];
+$kuvat_json_file = "kuvat.json";
 
-// YHDISTÄÄ TIETOKANTAAN
-$pdo = new PDO(
-    "mysql:host=localhost;dbname=paikanmuisti;charset=utf8mb4",
-    "root",
-    ""
-);
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+if (!file_exists($kuvat_json_file)) {
+    header("Location: KuvaA.php?error=not_found");
+    exit;
+}
 
-// HAKEE KUVAN TIEDOT
-$stmt = $pdo->prepare("SELECT kuva_url FROM kuvat WHERE id = ?");
-$stmt->execute([$id]);
-$kuva = $stmt->fetch(PDO::FETCH_ASSOC);
+$json_content = file_get_contents($kuvat_json_file);
+$kuvat_data = json_decode($json_content, true) ?? [];
 
-if (!$kuva) {
+if (!isset($kuvat_data[$id])) {
     die("Kuvaa ei löydy");
 }
 
-// POISTAA TIEDOSTON PALVELIMESTA
-if (file_exists($kuva["kuva_url"])) {
-    unlink($kuva["kuva_url"]);
+// Delete the actual image file
+if (file_exists($kuvat_data[$id]["kuva_url"])) {
+    unlink($kuvat_data[$id]["kuva_url"]);
 }
 
-// POISTAA TIEDOT TIETOKANNASTA
-$sql = "DELETE FROM kuvat WHERE id = ?";
-$stmt = $pdo->prepare($sql);
-$stmt->execute([$id]);
+// Remove from JSON
+unset($kuvat_data[$id]);
 
-// OHJAA TAKAISIN KUVA-ARKISTOON
+// Save updated JSON
+file_put_contents($kuvat_json_file, json_encode($kuvat_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
 header("Location: KuvaA.php");
 exit;
 ?>

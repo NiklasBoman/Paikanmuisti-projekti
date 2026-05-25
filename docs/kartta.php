@@ -135,7 +135,7 @@ if (file_exists($jsonFile)) {
                 
                 // Only update coordinates if this is a new story (not from _t.php)
                 // Static stories should keep their coordinates from _t.php files
-                if ($muokatut[$t["id"]]["northing"] !== null && $t["northing"] === null) {
+                if (isset($muokatut[$t["id"]]["northing"]) && $muokatut[$t["id"]]["northing"] !== null && $t["northing"] === null) {
                     $t["northing"] = isset($muokatut[$t["id"]]["northing"]) ? $muokatut[$t["id"]]["northing"] : null;
                     $t["easting"] = isset($muokatut[$t["id"]]["easting"]) ? $muokatut[$t["id"]]["easting"] : null;
                     $t["lat"] = isset($muokatut[$t["id"]]["lat"]) ? $muokatut[$t["id"]]["lat"] : null;
@@ -178,12 +178,18 @@ foreach ($tarinat as $t) {
         }
     }
     if (is_numeric($lat) && is_numeric($lng)) {
+        // Clean up kuvaus: remove coordinate line and extra spaces, preserve line breaks
+        $cleaned_kuvaus = $t["kuvaus"];
+        $cleaned_kuvaus = preg_replace('/<b>Koordinaatit[^<]*<\/b>[^<]*/', '', $cleaned_kuvaus);
+        $cleaned_kuvaus = strip_tags($cleaned_kuvaus, '<br><p><div>');
+        $cleaned_kuvaus = trim(preg_replace('/\s+<br\s*\/?>\s+/', '<br>', $cleaned_kuvaus));
+        
         $paikat[] = [
             "id" => $t["id"],
             "nimi" => $t["paikka"],
             "lat" => floatval($lat),
             "lng" => floatval($lng),
-            "kuvaus" => strip_tags($t["kuvaus"])
+            "kuvaus" => $cleaned_kuvaus
         ];
     }
 }
@@ -199,7 +205,8 @@ const selectedLng = <?php echo $selectedLng !== null ? json_encode($selectedLng)
 const selectedPlace = (selectedLat !== null && selectedLng !== null)
   ? { id: selectedStory, lat: selectedLat, lng: selectedLng }
   : paikat.find(p => selectedStory && p.id === selectedStory);
-const initialCenter = selectedPlace ? [selectedPlace.lat, selectedPlace.lng] : (paikat.length ? [paikat[0].lat, paikat[0].lng] : [62.95556, 26.75556]);
+const tervoCenter = [62.9551718187125, 26.754813361145764];
+const initialCenter = selectedPlace ? [selectedPlace.lat, selectedPlace.lng] : tervoCenter;
 const initialZoom = selectedPlace ? 15 : 12;
 const map = L.map('map').setView(initialCenter, initialZoom);
 
@@ -211,7 +218,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 paikat.forEach(p => {
   const marker = L.marker([p.lat, p.lng])
     .addTo(map)
-    .bindPopup(`<strong>${p.nimi}</strong><br>${p.kuvaus}`);
+    .bindPopup(`<strong>${p.nimi}</strong><br><br>${p.kuvaus}`);
 
   if (selectedPlace && p.id === selectedPlace.id) {
     marker.openPopup();

@@ -159,7 +159,7 @@ pluginspage="http://www.macromedia.com/go/getflashplayer"
 <b>Paikan kuvaus:</b> Lohkotila, joka on alunperin ollut Tiitilän talon torppa.<br>
 <b>Perimätietoa:</b> Torppa on arvelujen mukaan perustettu 1800-luvun puolivälissä. Tila sijaitsee metsittyneellä alueella, jossa kasvaa runsaasti koivuja.
 
-</div><div id="j5" style="display:none;">
+</div><div id='j5' style="display:none;">
 <b>Nimi:</b> Aatula<br>
 <b>Rinnakkaisnimi:</b> Ottola, Rantaharju, Mattila<br>
 <b>Paikan kuvaus:</b> Mattilan tilan aikaisempi nimi. Tila sijaitsee Nilakan rannalla.<br>
@@ -169,7 +169,9 @@ pluginspage="http://www.macromedia.com/go/getflashplayer"
 <b>Nimi:</b> Rantaharju<br>
 <b>Rinnakkaisnimi:</b> Mattila, Ottola, Aatula<br>
 <b>Paikan kuvaus:</b> Mattilan tilan virallinen nimi, ei kansanomaisessa käytössä. Tila sijaitsee Nilakan rannalla.<br>
-<b>Muita paikkaan liittyviä nimiä:</b> Lähistöllä on Rantala-niminen tila.<br><b>Koordinaatit (TM35):</b> N 6984530.04, E 479385.513</div><div id='j6' style="display:none;">
+<b>Muita paikkaan liittyviä nimiä:</b> Lähistöllä on Rantala-niminen tila.
+
+</div><div id='j6' style="display:none;">
 <b>Nimi:</b> Vehkapuro<br>
 <b>Rinnakkaisnimi:</b> Ritvanen<br>
 <b>Paikan kuvaus:</b> Luonnonoja, joka saa alkunsa Hautasuolta ja laskee Nilakkaan. Vehkapuro on myös lohkotilan nimi.<br>

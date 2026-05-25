@@ -125,13 +125,11 @@ pluginspage="http://www.macromedia.com/go/getflashplayer"
 <b>Rinnakkaisnimi:</b> Lassinluoto<br>
 <b>Paikan kuvaus:</b> Iisvedess‰ Vekaroniemen kaakkoispuolella oleva pieni saari. Nimen alkuper‰‰ ei tiedet‰. Kartassa virheellinen nimi Lassinluoto.
 
-</div><div id='e2' style="display:none;">
+</div><div id="e2" style="display:none;">
 <b>Nimi:</b> Kampinkaarre<br>
 <b>Rinnakkaisnimi:</b> Kamppikaarre<br>
 <b>Paikan kuvaus:</b> Vekaroniemen lounaispuolella olevan lahden nimi. Kartassa virheellinen nimi Kamppikaarre. <br>
-<b>Muita paikkaan liittyvi‰ nimi‰: </b> Kampinniemi sijaitsee lahden etel‰puolella.
-
-</div><div id='e3' style="display:none;">
+<b>Muita paikkaan liittyvi‰ nimi‰: </b> Kampinniemi sijaitsee lahden etel‰puolella.<br><b>Koordinaatit (TM35):</b> N 6966226.566, E 488369.424</div><div id='e3' style="display:none;">
 <b>Nimi:</b> Kampinniemi<br>
 <b>Rinnakkaisnimi:</b> Kamppiniemi, Kampinharju, Kaapinniemi<br>
 <b>Paikan kuvaus:</b> Vekaroniemen lounaiskulmassa oleva niemi.<br>

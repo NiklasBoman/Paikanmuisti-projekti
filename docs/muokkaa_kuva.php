@@ -6,33 +6,35 @@ if (!isset($_SESSION["admin"]) || $_SESSION["admin"] !== true) {
     die("Ei oikeuksia");
 }
 
-// YHDISTÄÄ TIETOKANTAAN
-$pdo = new PDO(
-    "mysql:host=localhost;dbname=paikanmuisti;charset=utf8mb4",
-    "root",
-    ""
-);
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$kuvat_json_file = "kuvat.json";
 
 // Käsittele POST (tallenna muutokset)
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (!isset($_POST["id"]) || !isset($_POST["kuvaus"])) {
-        die("Virheellinen pyyntö");
+        echo "success";
+        exit;
     }
 
-    $id = (int)$_POST["id"];
+    $id = $_POST["id"];
     $kuvaus = trim($_POST["kuvaus"]);
 
-    if ($id <= 0) {
-        die("Virheellinen ID");
+    if (!file_exists($kuvat_json_file)) {
+        echo "error";
+        exit;
     }
 
-    // PÄIVITÄ KUVAUS
-    $stmt = $pdo->prepare("UPDATE kuvat SET kuvaus = ? WHERE id = ?");
-    $stmt->execute([$kuvaus, $id]);
+    $json_content = file_get_contents($kuvat_json_file);
+    $kuvat_data = json_decode($json_content, true) ?? [];
 
-    // Ohjaa takaisin kuva-arkistoon
-    header("Location: KuvaA.php");
+    if (!isset($kuvat_data[$id])) {
+        echo "error";
+        exit;
+    }
+
+    $kuvat_data[$id]["kuvaus"] = $kuvaus;
+    file_put_contents($kuvat_json_file, json_encode($kuvat_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+    echo "success";
     exit;
 }
 
@@ -41,50 +43,72 @@ if (!isset($_GET["id"])) {
     die("Virhe: ID puuttuu");
 }
 
-$id = (int)$_GET["id"];
+$id = $_GET["id"];
 
-if ($id <= 0) {
-    die("Virheellinen ID");
-}
-
-// HAE KUVAN TIEDOT
-$stmt = $pdo->prepare("SELECT id, paikka, kuva_url, kuvaus FROM kuvat WHERE id = ?");
-$stmt->execute([$id]);
-$kuva = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$kuva) {
+if (!file_exists($kuvat_json_file)) {
     die("Kuvaa ei löytynyt");
 }
+
+$json_content = file_get_contents($kuvat_json_file);
+$kuvat_data = json_decode($json_content, true) ?? [];
+
+if (!isset($kuvat_data[$id])) {
+    die("Kuvaa ei löytynyt");
+}
+
+$kuva = $kuvat_data[$id];
 ?>
 <!DOCTYPE html>
 <html lang="fi">
 <head>
 <meta charset="UTF-8">
 <title>Muokkaa kuvan kuvausta</title>
-<link rel="stylesheet" href="Tyyli.css">
+<link rel="stylesheet" href="tyyli.css">
 </head>
 <body>
 
-<h2>Muokkaa kuvan kuvausta</h2>
+<nav>
+  <h2>Paikan Muisti</h2>
+  <ul>
+    <li><a href="kartta.php">Kartta</a></li>
+    <li><a href="tarinat.php">Arkisto</a></li>
+    <li><a href="KuvaA.php">Kuva-arkisto</a></li>
+    <li><a href="info.php">Info</a></li>
+    <li><a href="logout.php">Kirjaudu ulos</a></li>
+  </ul>
+</nav>
 
-<form method="POST" action="muokkaa_kuva.php">
-    <input type="hidden" name="id" value="<?php echo htmlspecialchars($kuva["id"]); ?>">
+<section class="form-container">
+  <div class="form-card">
+    <h2>Muokkaa kuvan kuvausta</h2>
 
-    <label>Paikka:</label><br>
-    <strong><?php echo htmlspecialchars($kuva["paikka"]); ?></strong><br><br>
+    <form method="POST" action="muokkaa_kuva.php" class="kuva-form">
+      <input type="hidden" name="id" value="<?php echo htmlspecialchars($kuva["id"]); ?>">
 
-    <label>Kuva:</label><br>
-    <img src="<?php echo htmlspecialchars($kuva["kuva_url"]); ?>" alt="<?php echo htmlspecialchars($kuva["paikka"]); ?>" style="max-width: 400px; max-height: 300px; margin-bottom: 20px;"><br><br>
+      <div class="form-group">
+        <label for="paikka">Paikka:</label>
+        <strong><?php echo htmlspecialchars($kuva["paikka"]); ?></strong>
+      </div>
 
-    <label>Kuvaus:</label><br>
-    <textarea name="kuvaus" style="width:500px; height:300px;"><?php 
-        echo htmlspecialchars($kuva["kuvaus"]); 
-    ?></textarea><br><br>
+      <div class="form-group">
+        <label>Kuva:</label>
+        <img src="<?php echo htmlspecialchars($kuva["kuva_url"]); ?>" alt="<?php echo htmlspecialchars($kuva["paikka"]); ?>" class="edit-image">
+      </div>
 
-    <button type="submit">Tallenna muutokset</button>
-    <br><br>
-    <a href="KuvaA.php">Peruuta</a>
-</form>
+      <div class="form-group">
+        <label for="kuvaus">Kuvaus:</label>
+        <textarea id="kuvaus" name="kuvaus" rows="5" class="edit-textarea"><?php 
+          echo htmlspecialchars($kuva["kuvaus"]); 
+        ?></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit">Tallenna muutokset</button>
+        <a href="KuvaA.php" class="btn-cancel">Peruuta</a>
+      </div>
+    </form>
+  </div>
+</section>
 
 </body>
 </html>

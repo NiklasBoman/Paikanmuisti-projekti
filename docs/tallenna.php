@@ -1,6 +1,23 @@
 <?php
 session_start();
 
+function normalize_story_id($id) {
+    $id = trim($id);
+    if ($id === '') {
+        return 'story';
+    }
+
+    $converted = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $id);
+    if ($converted !== false) {
+        $id = $converted;
+    }
+
+    $id = preg_replace('/[^A-Za-z0-9_-]+/', '_', $id);
+    $id = preg_replace('/_+/', '_', $id);
+    $id = trim($id, '_');
+    return $id === '' ? 'story' : $id;
+}
+
 function parse_coordinate_field($value) {
     $value = trim($value);
     if ($value === '') {
@@ -37,19 +54,23 @@ function find_static_story($id) {
         preg_match_all('/<div id=[\'\"]([^\'\"]+)[\'\"][^>]*>(.*?)<\/div>/si', $html, $matches);
 
         for ($i = 0; $i < count($matches[1]); $i++) {
-            $id_base = $matches[1][$i];
-        $content = $matches[2][$i];
+            $id_base_raw = $matches[1][$i];
+            $id_base = normalize_story_id($id_base_raw);
+            $content = $matches[2][$i];
 
             $parts = preg_split('/(?=<b>(Nimi|Paikka):\s*<\/b>)/i', $content, -1, PREG_SPLIT_NO_EMPTY);
             $parts = $parts ?: [];
-            foreach ($parts as $index => $part) {
-                $storyId = $id_base . "_" . $index;
+            $partIndex = 0;
+            foreach ($parts as $part) {
+                $storyId = $id_base . "_" . $partIndex;
                 if ($storyId === $id) {
                     return [
                         'filename' => $filename,
-                        'rawPart' => $part
+                        'rawPart' => $part,
+                        'rawIdBase' => $id_base_raw
                     ];
                 }
+                $partIndex++;
             }
         }
     }
@@ -112,17 +133,15 @@ function tm35_to_wgs84($northing, $easting) {
     return [rad2deg($phi), rad2deg($lambda)];
 }
 
-// Vain admin saa tallentaa
 if (!isset($_SESSION["admin"]) || $_SESSION["admin"] !== true) {
     die("Ei oikeuksia");
 }
 
-// Tarkista että data tuli
 if (!isset($_POST["id"]) || !isset($_POST["paikka"]) || !isset($_POST["kuvaus"])) {
     die("Virhe: puuttuva data");
 }
 
-$id = $_POST["id"];
+$id = normalize_story_id($_POST["id"]);
 $paikka = $_POST["paikka"];
 $kuvaus = $_POST["kuvaus"];
 
@@ -139,7 +158,6 @@ if ($northing < 6500000 || $northing > 7700000 || $easting < 100000 || $easting 
 
 list($lat, $lng) = tm35_to_wgs84($northing, $easting);
 
-// Lue olemassa oleva JSON
 $jsonFile = "tarinat.json";
 $data = [];
 
@@ -150,32 +168,36 @@ if (file_exists($jsonFile)) {
 }
 
 $staticStory = find_static_story($id);
+if (!$staticStory) {
+    foreach ($data as $existingKey => $existingStory) {
+        if (normalize_story_id($existingKey) === $id) {
+            $id = $existingKey;
+            break;
+        }
+    }
+    $staticStory = find_static_story($id);
+}
 if ($staticStory) {
     // Päivitä staattinen tarina tiedostoon
     $oldPart = $staticStory['rawPart'];
     $newPart = $oldPart;
     
-    // Poista vanhat koordinaatit
     $newPart = preg_replace('/<br\s*\/?><b>Koordinaatit[^<]*<\/b>[^<]*/', '', $newPart);
     $newPart = preg_replace('/<b>Koordinaatit[^<]*<\/b>[^<]*/', '', $newPart);
     
-    // Poista lopun ylimääräinen br-tagi
     $newPart = rtrim($newPart);
     $newPart = preg_replace('/<\s*br\s*\/?\s*>$/', '', $newPart);
     
-    // Lisää uudet koordinaatit
     $newPart = $newPart . '<br><b>Koordinaatit (TM35):</b> N ' . $northing . ', E ' . $easting;
     
     $updated = replace_static_story($staticStory['filename'], $oldPart, $newPart);
     
-    // Vaihtoehtoinen korvaus, jos peruskorvaus epäonnistuu
     if (!$updated) {
         $file = $staticStory['filename'];
         $html = file_get_contents($file);
         $html = mb_convert_encoding($html, 'UTF-8', 'ISO-8859-1');
         
-        // Etsi div-tagin sisältö ja korvaa se
-        $divPattern = '/<div\s+id=[\'"]' . preg_quote(explode('_', $id)[0]) . '[\'"][^>]*>(.*?)<\/div>/is';
+        $divPattern = '/<div\s+id=[\'"]' . preg_quote($staticStory['rawIdBase']) . '[\'"][^>]*>(.*?)<\/div>/is';
         
         if (preg_match($divPattern, $html, $divMatches)) {
             $divContent = $divMatches[1];
@@ -184,7 +206,7 @@ if ($staticStory) {
             $newDivContent = preg_replace('/<\s*br\s*\/?\s*>$/', '', $newDivContent);
             $newDivContent = $newDivContent . '<br><b>Koordinaatit (TM35):</b> N ' . $northing . ', E ' . $easting;
             
-            $newHtml = str_replace($divMatches[0], '<div id="' . explode('_', $id)[0] . '" style="display:none;">' . $newDivContent . '</div>', $html);
+            $newHtml = str_replace($divMatches[0], '<div id="' . $staticStory['rawIdBase'] . '" style="display:none;">' . $newDivContent . '</div>', $html);
             
             if ($newHtml !== $html) {
                 $newHtml = mb_convert_encoding($newHtml, 'ISO-8859-1', 'UTF-8');
@@ -198,7 +220,6 @@ if ($staticStory) {
         die("Virhe: tarinan tallennus tiedostoon epäonnistui. (Tarinaa ei löytynyt tiedostosta.)");
     }
     
-    // Poista mahdollinen staattinen tarina JSONista
     if (isset($data[$id])) {
         unset($data[$id]);
     }

@@ -1,4 +1,3 @@
-
 <?php
 ob_start();
 session_start();
@@ -28,11 +27,25 @@ if (!move_uploaded_file($_FILES["kuva"]["tmp_name"], $targetFile)) {
     exit;
 }
 
-$pdo = new PDO("mysql:host=localhost;dbname=paikanmuisti;charset=utf8mb4", "root", "");
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+// Store image metadata in JSON file
+$kuvat_json_file = "kuvat.json";
+$kuvat_data = [];
 
-$stmt = $pdo->prepare("INSERT INTO kuvat (paikka, kuva_url, kuvaus) VALUES (?, ?, ?)");
-$stmt->execute([$paikka, $targetFile, $kuvaus]);
+if (file_exists($kuvat_json_file)) {
+    $json_content = file_get_contents($kuvat_json_file);
+    $kuvat_data = json_decode($json_content, true) ?? [];
+}
+
+$image_id = time() . "_" . uniqid();
+$kuvat_data[$image_id] = [
+    "id" => $image_id,
+    "paikka" => $paikka,
+    "kuva_url" => $targetFile,
+    "kuvaus" => $kuvaus,
+    "lisatty" => date("Y-m-d H:i:s")
+];
+
+file_put_contents($kuvat_json_file, json_encode($kuvat_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
 header("Location: KuvaA.php?ok=1");
 exit;
