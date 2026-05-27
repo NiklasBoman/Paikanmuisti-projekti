@@ -1,2 +1,2 @@
 # Paikanmuisti-projekti
-projekti
+Paikan muisti järjestelmä tervon seuralle
